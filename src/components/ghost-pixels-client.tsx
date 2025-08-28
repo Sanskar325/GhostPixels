@@ -1,3 +1,5 @@
+
+
 "use client";
 
 import { useState, useRef, ChangeEvent, useEffect } from "react";
@@ -30,9 +32,198 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { encryptMessage, decryptMessage } from "../lib/crypto";
-import { encodeMessage, decodeMessage, checkCapacity } from "../lib/steganography";
 import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-optimizer-dialog";
+
+// --- START: Inlined crypto.ts ---
+async function getKey(password: string, salt: Uint8Array): Promise<CryptoKey> {
+  const enc = new TextEncoder();
+  const keyMaterial = await window.crypto.subtle.importKey(
+    'raw',
+    enc.encode(password),
+    { name: 'PBKDF2' },
+    false,
+    ['deriveKey']
+  );
+  return window.crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: salt,
+      iterations: 100000,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    true,
+    ['encrypt', 'decrypt']
+  );
+}
+
+async function encryptMessage(message: string, password: string): Promise<string> {
+  try {
+    const salt = window.crypto.getRandomValues(new Uint8Array(16));
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    const key = await getKey(password, salt);
+    const enc = new TextEncoder();
+    const encodedMessage = enc.encode(message);
+
+    const ciphertext = await window.crypto.subtle.encrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      encodedMessage
+    );
+
+    const encryptedData = new Uint8Array(salt.length + iv.length + ciphertext.byteLength);
+    encryptedData.set(salt, 0);
+    encryptedData.set(iv, salt.length);
+    encryptedData.set(new Uint8Array(ciphertext), salt.length + iv.length);
+
+    // Convert Uint8Array to a string of characters and then to base64
+    const charString = String.fromCharCode.apply(null, Array.from(encryptedData));
+    return btoa(charString);
+  } catch (error) {
+    console.error('Encryption failed:', error);
+    throw new Error('Encryption failed. Please check the password and try again.');
+  }
+}
+
+async function decryptMessage(encryptedBase64: string, password: string): Promise<string> {
+  try {
+    const binaryString = atob(encryptedBase64);
+    const encryptedData = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i));
+    
+    if (encryptedData.length < 28) { // 16 for salt + 12 for IV
+      throw new Error("Invalid encrypted data format.");
+    }
+    
+    const salt = encryptedData.slice(0, 16);
+    const iv = encryptedData.slice(16, 28);
+    const ciphertext = encryptedData.slice(28);
+
+    const key = await getKey(password, salt);
+
+    const decrypted = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: iv },
+      key,
+      ciphertext
+    );
+
+    const dec = new TextDecoder();
+    return dec.decode(decrypted);
+  } catch (error) {
+    console.error('Decryption failed:', error);
+    throw new Error('Decryption failed. Please check the password and that the data is correct.');
+  }
+}
+// --- END: Inlined crypto.ts ---
+
+
+// --- START: Inlined steganography.ts ---
+const DELIMITER = "001100010011010100111001001100100011010100110111"; // "159257" in binary, unlikely sequence
+
+function textToBinary(text: string): string {
+  return text.split('').map(char => {
+    return char.charCodeAt(0).toString(2).padStart(8, '0');
+  }).join('');
+}
+
+function binaryToText(binary: string): string {
+  if (binary.length % 8 !== 0) {
+    console.error("Binary string length is not a multiple of 8");
+    // Trim to the nearest multiple of 8
+    binary = binary.substring(0, binary.length - (binary.length % 8));
+  }
+  
+  let text = '';
+  for (let i = 0; i < binary.length; i += 8) {
+    const byte = binary.substr(i, 8);
+    text += String.fromCharCode(parseInt(byte, 2));
+  }
+  return text;
+}
+
+const checkCapacity = (width: number, height: number, bitDepth: number, channel: string, message: string): boolean => {
+    const binaryMessage = textToBinary(message) + DELIMITER;
+    const requiredCapacity = binaryMessage.length;
+    const channelCount = channel === 'RGB' ? 3 : 1;
+    const availableCapacity = width * height * channelCount * bitDepth;
+    return requiredCapacity <= availableCapacity;
+}
+
+const encodeMessage = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  message: string,
+  bitDepth: number,
+  channel: string
+) => {
+  const binaryMessage = textToBinary(message) + DELIMITER;
+  let messageIndex = 0;
+
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  const mask = (255 << bitDepth) & 255;
+  
+  const channelsToUse = {
+    R: [0],
+    G: [1],
+    B: [2],
+    RGB: [0, 1, 2]
+  }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
+
+
+  for (let i = 0; i < data.length; i += 4) {
+    for(const channelIndex of channelsToUse){
+        if (messageIndex < binaryMessage.length) {
+            const bitsToHide = binaryMessage.substring(messageIndex, messageIndex + bitDepth);
+            const bitsValue = parseInt(bitsToHide, 2);
+
+            data[i + channelIndex] = (data[i + channelIndex] & mask) | bitsValue;
+            messageIndex += bitDepth;
+        } else {
+            break;
+        }
+    }
+    if(messageIndex >= binaryMessage.length) break;
+  }
+
+  ctx.putImageData(imageData, 0, 0);
+};
+
+const decodeMessage = (
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  bitDepth: number,
+  channel: string
+): string => {
+  let binaryMessage = '';
+  const imageData = ctx.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  const lsbMask = (1 << bitDepth) - 1;
+
+  const channelsToUse = {
+    R: [0],
+    G: [1],
+    B: [2],
+    RGB: [0, 1, 2]
+  }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
+
+  for (let i = 0; i < data.length; i += 4) {
+    for(const channelIndex of channelsToUse){
+        const lsb = data[i + channelIndex] & lsbMask;
+        binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+    }
+    
+    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+    if(delimiterIndex !== -1){
+        binaryMessage = binaryMessage.substring(0, delimiterIndex);
+        return binaryToText(binaryMessage);
+    }
+  }
+  return ""; // Delimiter not found
+};
+// --- END: Inlined steganography.ts ---
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -416,5 +607,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
