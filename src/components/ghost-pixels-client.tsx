@@ -30,8 +30,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { encryptMessage, decryptMessage } from "@/lib/crypto";
-import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
+import { encryptMessage, decryptMessage } from "../lib/crypto";
+import { encodeMessage, decodeMessage, checkCapacity } from "../lib/steganography";
 import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-optimizer-dialog";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
@@ -416,3 +416,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
