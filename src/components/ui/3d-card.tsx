@@ -1,3 +1,4 @@
+
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -49,7 +50,7 @@ export const CardContainer = ({
     <MouseEnterContext.Provider value={[isMouseEntered, setIsMouseEntered]}>
       <div
         className={cn(
-          "py-20 flex items-center justify-center",
+          "flex items-center justify-center",
           containerClassName
         )}
         style={{
@@ -86,7 +87,7 @@ export const CardBody = ({
   return (
     <div
       className={cn(
-        "[transform-style:preserve-3d]  [&>*]:[transform-style:preserve-3d]",
+        "[transform-style:preserve-d]  [&>*]:[transform-style:preserve-d]",
         className
       )}
     >
@@ -153,3 +154,5 @@ export const useMouseEnter = () => {
   }
   return context;
 };
+
+    
