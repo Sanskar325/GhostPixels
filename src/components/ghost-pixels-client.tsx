@@ -36,6 +36,7 @@ import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-opt
 import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 import { Meteors } from "./ui/meteors";
+import { CardContainer, CardBody, CardItem } from "./ui/3d-card";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -402,7 +403,13 @@ export function GhostPixelsClient() {
                    </CardHeader>
                    <CardContent>
                         <canvas ref={encodedCanvasRef} className="hidden" />
-                        <ImageBox src={encodedImageUrl || originalImageUrl} alt={encodedImageUrl ? "Encoded" : "Original"} />
+                        <CardContainer>
+                            <CardBody>
+                                <CardItem translateZ="60">
+                                    <ImageBox src={encodedImageUrl || originalImageUrl} alt={encodedImageUrl ? "Encoded" : "Original"} />
+                                </CardItem>
+                            </CardBody>
+                        </CardContainer>
                         {encodedImageUrl && (
                         <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
                             <Download className="mr-2 h-4 w-4" /> Download
@@ -458,7 +465,13 @@ export function GhostPixelsClient() {
                     <CardTitle>Image to Decode</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                    <CardContainer>
+                        <CardBody>
+                            <CardItem translateZ="60">
+                                <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                            </CardItem>
+                        </CardBody>
+                    </CardContainer>
                   </CardContent>
                 </Card>
                  {decodedMessage && (

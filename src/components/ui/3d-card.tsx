@@ -1,4 +1,3 @@
-
 "use client";
 
 import { cn } from "@/lib/utils";
@@ -87,7 +86,7 @@ export const CardBody = ({
   return (
     <div
       className={cn(
-        "[transform-style:preserve-d]  [&>*]:[transform-style:preserve-d]",
+        "[transform-style:preserve-d]  [&>*]:[transform-style:preserve-d] w-full h-full",
         className
       )}
     >
@@ -138,7 +137,7 @@ export const CardItem = ({
   return (
     <Tag
       ref={ref}
-      className={cn("transition duration-200 ease-linear", className)}
+      className={cn("w-full transition duration-200 ease-linear", className)}
       {...rest}
     >
       {children}
