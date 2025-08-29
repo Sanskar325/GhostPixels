@@ -253,11 +253,11 @@ export function GhostPixelsClient() {
       </div>
   );
   
-  const ImageBox = ({src, alt} : {src: string | null, alt: string}) => (
-     <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50">
-       {src ? <Image src={src} alt={alt} layout="fill" className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
+  const ImageBox = ({src, alt}: {src: string | null, alt: string}) => (
+    <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
+      {src ? <Image src={src} alt={alt} fill className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
     </div>
-  )
+  );
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -436,5 +436,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
