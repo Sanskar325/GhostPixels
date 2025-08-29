@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, ChangeEvent, useEffect } from "react";
@@ -454,3 +455,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
