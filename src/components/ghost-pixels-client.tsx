@@ -36,7 +36,6 @@ import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-opt
 import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 import { Meteors } from "./ui/meteors";
-import { CardContainer, CardBody, CardItem } from "./ui/3d-card";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -301,6 +300,17 @@ export function GhostPixelsClient() {
 
     img.src = stegoImageUrl!;
   };
+  
+  const handleDownload = () => {
+    if (!encodedImageUrl) return;
+    const a = document.createElement('a');
+    a.href = encodedImageUrl;
+    a.download = 'encoded-image.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
 
   const applyAiSettings = (settings: RecommendedSettings) => {
     setBitDepth(settings.recommendedBitDepth);
@@ -382,34 +392,26 @@ export function GhostPixelsClient() {
             </div>
 
             <div className="md:col-span-1 space-y-6">
-                <CardContainer containerClassName="py-0">
-                  <CardBody className="w-full h-full bg-transparent relative">
-                      <CardItem translateZ="60" className="w-full">
-                           <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
-                           <CardContent>
-                            <ImageBox src={originalImageUrl} alt="Original" />
-                           </CardContent>
-                      </CardItem>
-                  </CardBody>
-                </CardContainer>
-                 <CardContainer containerClassName={`py-0 ${!encodedImageUrl ? 'hidden' : ''}`}>
-                   <CardBody className="w-full h-full bg-transparent relative">
-                      <CardItem translateZ="60" className="w-full">
-                          <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
-                          <CardContent>
-                            <canvas ref={encodedCanvasRef} className="hidden" />
-                            <ImageBox src={encodedImageUrl} alt="Encoded" />
-                             {encodedImageUrl && (
-                               <a href={encodedImageUrl} download="encoded-image.png" className="mt-4 block">
-                                  <Button variant="secondary" className="w-full text-md py-5">
-                                      <Download className="mr-2 h-4 w-4" /> Download
-                                  </Button>
-                              </a>
-                            )}
-                          </CardContent>
-                      </CardItem>
-                   </CardBody>
-                </CardContainer>
+                <Card className="bg-card/70 shadow-lg">
+                   <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
+                   <CardContent>
+                    <ImageBox src={originalImageUrl} alt="Original" />
+                   </CardContent>
+                </Card>
+                 <div className={`${!encodedImageUrl ? 'hidden' : ''}`}>
+                    <Card className="bg-card/70 shadow-lg">
+                        <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
+                        <CardContent>
+                          <canvas ref={encodedCanvasRef} className="hidden" />
+                          <ImageBox src={encodedImageUrl} alt="Encoded" />
+                           {encodedImageUrl && (
+                             <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
+                                <Download className="mr-2 h-4 w-4" /> Download
+                            </Button>
+                          )}
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
           </div>
         </TabsContent>
@@ -453,16 +455,12 @@ export function GhostPixelsClient() {
               </div>
 
                <div className="md:col-span-1 space-y-6">
-                 <CardContainer containerClassName="py-0">
-                   <CardBody className="w-full h-full bg-transparent relative">
-                     <CardItem translateZ="60" className="w-full">
-                       <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
-                        <CardContent>
-                           <ImageBox src={stegoImageUrl} alt="Steganography Image" />
-                        </CardContent>
-                     </CardItem>
-                   </CardBody>
-                 </CardContainer>
+                 <Card className="bg-card/70 shadow-lg">
+                   <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
+                    <CardContent>
+                       <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                    </CardContent>
+                 </Card>
                  {decodedMessage && (
                     <Card className="shadow-lg">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
@@ -485,7 +483,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
-
-    
