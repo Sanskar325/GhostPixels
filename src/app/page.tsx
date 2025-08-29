@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="relative flex flex-col min-h-screen bg-background text-foreground font-body">
       <LampDemo />
-      <main className="flex-1 -mt-[20rem]">
+      <main className="flex-1 -mt-[24rem] z-10">
         <GhostPixelsClient />
       </main>
       <footer className="bg-card/50 border-t py-6 mt-16">
