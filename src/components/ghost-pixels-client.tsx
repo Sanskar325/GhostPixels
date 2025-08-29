@@ -254,34 +254,36 @@ export function GhostPixelsClient() {
 
     const img = document.createElement('img');
     img.onload = async () => {
-      try {
         const canvas = stegoCanvasRef.current;
         if (!canvas) {
             toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
+            setIsLoading(false);
             return;
         }
         canvas.width = img.width;
         canvas.height = img.height;
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if(!ctx) {
-          toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
-          return;
+            toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
+            setIsLoading(false);
+            return;
         }
         ctx.drawImage(img, 0, 0);
-        const extractedMessage = await decodeMessage(ctx, img.width, img.height, bitDepth, channel);
-        if (!extractedMessage) {
-            throw new Error("No message found or extraction failed.");
+        try {
+            const extractedMessage = await decodeMessage(ctx, img.width, img.height, bitDepth, channel);
+            if (!extractedMessage) {
+                throw new Error("No message found or extraction failed.");
+            }
+            const decryptedMessage = await decryptMessage(extractedMessage, password);
+            setDecodedMessage(decryptedMessage);
+            toast({ title: "Success!", description: "Secret message has been revealed." });
+        } catch (error) {
+            console.error("Decoding error:", error);
+            const errorMessage = error instanceof Error ? error.message : "Could not decode message. Check password, settings, or if the image contains a message.";
+            toast({ variant: "destructive", title: "Decoding Failed", description: errorMessage });
+        } finally {
+            setIsLoading(false);
         }
-        const decryptedMessage = await decryptMessage(extractedMessage, password);
-        setDecodedMessage(decryptedMessage);
-        toast({ title: "Success!", description: "Secret message has been revealed." });
-      } catch (error) {
-        console.error("Decoding error:", error);
-        const errorMessage = error instanceof Error ? error.message : "Could not decode message. Check password, settings, or if the image contains a message.";
-        toast({ variant: "destructive", title: "Decoding Failed", description: errorMessage });
-      } finally {
-        setIsLoading(false);
-      }
     };
 
     img.onerror = () => {
@@ -449,7 +451,7 @@ export function GhostPixelsClient() {
                        <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
                         <CardContent>
                            <ImageBox src={stegoImageUrl} alt="Steganography Image" />
-                        </dCardContent>
+                        </CardContent>
                      </CardItem>
                    </CardBody>
                  </CardContainer>
@@ -475,3 +477,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
