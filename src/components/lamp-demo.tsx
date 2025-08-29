@@ -28,7 +28,7 @@ export function LampDemo() {
           }}
           className="mt-4 text-lg text-center text-muted-foreground max-w-xl"
        >
-        GhostPixels uses the art of steganography to embed your secret messages within images, making them invisible to the naked eye.
+        GhostPixels uses the art of steganography to embed your secret messages within images, making them invisible to the naked eye. Secure your data, protect your privacy, and communicate with confidence, knowing your information is cleverly concealed from unauthorized access.
        </motion.p>
     </LampContainer>
   );
