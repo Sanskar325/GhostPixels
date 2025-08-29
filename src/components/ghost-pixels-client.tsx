@@ -44,14 +44,14 @@ export function GhostPixelsClient() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [bitDepth, setBitDepth] = useState(1);
+  const [channel, setChannel] = useState<StegoChannel>("RGB");
 
   // Encode state
   const [originalImage, setOriginalImage] = useState<File | null>(null);
   const [originalImageUrl, setOriginalImageUrl] = useState<string | null>(null);
   const [encodedImageUrl, setEncodedImageUrl] = useState<string | null>(null);
   const [message, setMessage] = useState("");
-  const [bitDepth, setBitDepth] = useState(1);
-  const [channel, setChannel] = useState<StegoChannel>("RGB");
   const [isAiOptimizerOpen, setIsAiOptimizerOpen] = useState(false);
 
   // Decode state
@@ -92,6 +92,9 @@ export function GhostPixelsClient() {
     setIsLoading(false);
     setPassword("");
     setShowPassword(false);
+    setBitDepth(1);
+    setChannel('RGB');
+
     if(tab === 'encode') {
       setOriginalImage(null);
       if(originalImageUrl) URL.revokeObjectURL(originalImageUrl);
@@ -99,8 +102,6 @@ export function GhostPixelsClient() {
       if(encodedImageUrl) URL.revokeObjectURL(encodedImageUrl);
       setEncodedImageUrl(null);
       setMessage('');
-      setBitDepth(1);
-      setChannel('RGB');
     } else {
       setStegoImage(null);
       if(stegoImageUrl) URL.revokeObjectURL(stegoImageUrl);
@@ -190,7 +191,8 @@ export function GhostPixelsClient() {
         toast({ title: "Success", description: "Message decoded successfully." });
       } catch (error) {
         console.error("Decoding error:", error);
-        toast({ variant: "destructive", title: "Decoding Failed", description: "Could not decode message. Check password, settings, or if the image contains a message." });
+        const errorMessage = error instanceof Error ? error.message : "Could not decode message. Check password, settings, or if the image contains a message.";
+        toast({ variant: "destructive", title: "Decoding Failed", description: errorMessage });
       } finally {
         setIsLoading(false);
       }
@@ -228,7 +230,10 @@ export function GhostPixelsClient() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={(value) => {
+        setActiveTab(value);
+        resetState(value as "encode" | "decode");
+      }} className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="encode">
             <Lock className="mr-2 h-4 w-4" /> Encode
@@ -357,8 +362,8 @@ export function GhostPixelsClient() {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password</CardTitle>
-                        <CardDescription>The password used during encoding.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
+                        <CardDescription>The password and settings used during encoding.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
