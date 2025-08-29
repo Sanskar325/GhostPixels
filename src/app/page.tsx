@@ -1,5 +1,4 @@
 import { GhostPixelsClient } from "@/components/ghost-pixels-client";
-import GlobeDemo from "@/components/ui/globe-demo";
 import { ShieldCheck } from "lucide-react";
 
 export default function Home() {
@@ -14,8 +13,7 @@ export default function Home() {
             <p className="text-muted-foreground hidden md:block">Hide your secrets in plain sight.</p>
         </div>
       </header>
-      <main className="flex-1">
-        <GlobeDemo />
+      <main className="flex-1 pt-8">
         <GhostPixelsClient />
       </main>
       <footer className="bg-card/50 border-t py-6 mt-16">
