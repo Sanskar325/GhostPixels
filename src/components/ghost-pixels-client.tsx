@@ -35,6 +35,7 @@ import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-opt
 import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
+import { Meteors } from "./ui/meteors";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -286,7 +287,7 @@ export function GhostPixelsClient() {
                 </CardContent>
               </Card>
               
-               <Card className="bg-card/70 shadow-lg">
+               <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><KeyRound /> 2. Add Secret</CardTitle>
                   <CardDescription>Provide the message and a password to encrypt it.</CardDescription>
@@ -301,9 +302,10 @@ export function GhostPixelsClient() {
                     <PasswordInput id="password-encode" />
                   </div>
                 </CardContent>
+                <Meteors number={10} />
               </Card>
               
-              <Card className="bg-card/70 shadow-lg">
+              <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                  <CardHeader>
                     <div className="flex justify-between items-start">
                         <div>
@@ -316,6 +318,7 @@ export function GhostPixelsClient() {
                 <CardContent>
                   <SettingsControls />
                 </CardContent>
+                <Meteors number={10} />
               </Card>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -379,7 +382,7 @@ export function GhostPixelsClient() {
                         <canvas ref={stegoCanvasRef} className="hidden" />
                     </CardContent>
                 </Card>
-                <Card className="bg-card/70 shadow-lg">
+                <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
                         <CardDescription>Provide the password and settings used for encoding.</CardDescription>
@@ -391,6 +394,7 @@ export function GhostPixelsClient() {
                         </div>
                         <SettingsControls />
                     </CardContent>
+                    <Meteors number={10} />
                 </Card>
                  <div className="flex flex-col sm:flex-row gap-4">
                   <Button onClick={handleDecode} disabled={isLoading} className="flex-1 text-lg py-6 shadow-xl shadow-primary/20" size="lg">
