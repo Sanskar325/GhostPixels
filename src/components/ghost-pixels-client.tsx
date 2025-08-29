@@ -195,33 +195,39 @@ export function GhostPixelsClient() {
       const img = document.createElement('img');
       
       img.onload = () => {
-        const canvas = encodedCanvasRef.current;
-        if (!canvas) {
+        try {
+          const canvas = encodedCanvasRef.current;
+          if (!canvas) {
+              toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
+              setIsLoading(false);
+              return;
+          }
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          if(!ctx) {
+            toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
             setIsLoading(false);
-            toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
             return;
-        }
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        if(!ctx) {
-          setIsLoading(false);
-          toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
-          return;
-        }
+          }
 
-        ctx.drawImage(img, 0, 0);
+          ctx.drawImage(img, 0, 0);
 
-        if(!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage)){
-          toast({ variant: "destructive", title: "Capacity Exceeded", description: "Message is too large for the selected image and settings. Try a larger image, or increase bit depth." });
-          setIsLoading(false);
-          return;
+          if(!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage)){
+            toast({ variant: "destructive", title: "Capacity Exceeded", description: "Message is too large for the selected image and settings. Try a larger image, or increase bit depth." });
+            setIsLoading(false);
+            return;
+          }
+
+          encodeMessage(ctx, img.width, img.height, encryptedMessage, bitDepth, channel);
+          setEncodedImageUrl(canvas.toDataURL("image/png"));
+          toast({ title: "Success!", description: "Message successfully hidden in the image." });
+        } catch(error) {
+           console.error("Encoding error:", error);
+           toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
+        } finally {
+            setIsLoading(false);
         }
-
-        encodeMessage(ctx, img.width, img.height, encryptedMessage, bitDepth, channel);
-        setEncodedImageUrl(canvas.toDataURL("image/png"));
-        toast({ title: "Success!", description: "Message successfully hidden in the image." });
-        setIsLoading(false);
       };
       
       img.onerror = () => {
@@ -232,8 +238,8 @@ export function GhostPixelsClient() {
       img.src = originalImageUrl!;
 
     } catch (error) {
-      console.error("Encoding error:", error);
-      toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
+      console.error("Encryption error:", error);
+      toast({ variant: "destructive", title: "Encryption Failed", description: "An error occurred during encryption. Check console for details." });
       setIsLoading(false);
     }
   };
@@ -248,22 +254,20 @@ export function GhostPixelsClient() {
 
     const img = document.createElement('img');
     img.onload = async () => {
-      const canvas = stegoCanvasRef.current;
-      if (!canvas) {
-          setIsLoading(false);
-          toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
-          return;
-      }
-      canvas.width = img.width;
-      canvas.height = img.height;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if(!ctx) {
-        setIsLoading(false);
-        toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
-        return;
-      }
-      ctx.drawImage(img, 0, 0);
       try {
+        const canvas = stegoCanvasRef.current;
+        if (!canvas) {
+            toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
+            return;
+        }
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if(!ctx) {
+          toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
         const extractedMessage = await decodeMessage(ctx, img.width, img.height, bitDepth, channel);
         if (!extractedMessage) {
             throw new Error("No message found or extraction failed.");
