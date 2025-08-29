@@ -104,7 +104,7 @@ const SettingsControls = ({ bitDepth, setBitDepth, channel, setChannel }: Settin
 
 const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
   return (
-    <div className="w-full min-h-[300px] lg:min-h-[400px] bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
+    <div className="w-full min-h-[250px] lg:min-h-[300px] bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
       {src ? (
         <Image src={src} alt={alt} width={800} height={600} className="w-full h-full object-contain" />
       ) : (
@@ -452,7 +452,7 @@ export function GhostPixelsClient() {
                 </div>
               </div>
 
-              <div className="space-y-6 h-full">
+              <div className="space-y-6">
                 {stegoImageUrl && (
                   <Card className="bg-card/70 shadow-lg">
                     <CardHeader>
