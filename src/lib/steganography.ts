@@ -55,11 +55,13 @@ export const encodeMessage = (
   for (let i = 0; i < data.length; i += 4) {
     for(const channelIndex of channelsToUse){
         if (messageIndex < binaryMessage.length) {
-            const bitsToHide = binaryMessage.substring(messageIndex, messageIndex + bitDepth);
+            let bitsToHide = binaryMessage.substring(messageIndex, messageIndex + bitDepth);
+            
+            // Pad bits if it's the end of the message and not a full chunk
             if (bitsToHide.length < bitDepth) {
-              // Not enough bits left in the message, should not happen if capacity is checked
-              break;
+              bitsToHide = bitsToHide.padEnd(bitDepth, '0');
             }
+
             const bitsValue = parseInt(bitsToHide, 2);
 
             data[i + channelIndex] = (data[i + channelIndex] & mask) | bitsValue;
@@ -85,7 +87,6 @@ export const decodeMessage = (
   const imageData = ctx.getImageData(0, 0, width, height);
   const data = imageData.data;
   const lsbMask = (1 << bitDepth) - 1;
-  const CHUNK_SIZE = 4096; // Process pixels in chunks to avoid freezing
 
   const channelsToUse = {
     R: [0],
@@ -93,23 +94,31 @@ export const decodeMessage = (
     B: [2],
     RGB: [0, 1, 2]
   }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
+  
+  const CHUNK_SIZE = 8192; // Process in larger chunks to speed up delimiter search
 
-  for (let i = 0; i < data.length; i += CHUNK_SIZE * 4) {
-    let chunkBinary = '';
-    const end = Math.min(i + CHUNK_SIZE * 4, data.length);
-    for (let j = i; j < end; j += 4) {
-      for(const channelIndex of channelsToUse){
-          const lsb = data[j + channelIndex] & lsbMask;
-          chunkBinary += lsb.toString(2).padStart(bitDepth, '0');
-      }
+  for (let i = 0; i < data.length; i += 4) {
+    for(const channelIndex of channelsToUse){
+        const lsb = data[i + channelIndex] & lsbMask;
+        binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
     }
     
-    binaryMessage += chunkBinary;
-    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-    if(delimiterIndex !== -1){
-        binaryMessage = binaryMessage.substring(0, delimiterIndex);
-        return binaryToText(binaryMessage);
+    // Check for delimiter periodically to avoid building a massive string
+    if (i > 0 && (i / 4) % CHUNK_SIZE === 0) {
+      const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+      if(delimiterIndex !== -1){
+          binaryMessage = binaryMessage.substring(0, delimiterIndex);
+          return binaryToText(binaryMessage);
+      }
     }
   }
+  
+  // Final check if delimiter was not found in chunks
+  const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+  if(delimiterIndex !== -1){
+      binaryMessage = binaryMessage.substring(0, delimiterIndex);
+      return binaryToText(binaryMessage);
+  }
+
   return ""; // Delimiter not found
 };
