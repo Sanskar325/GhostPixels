@@ -277,16 +277,18 @@ export function GhostPixelsClient() {
         <TabsContent value="encode" className="mt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
             <div className="space-y-6">
-               <Card className="bg-card/70 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
-                  <CardDescription>Select a PNG or JPEG to hide your message in.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} className="file:text-primary file:font-bold" />
-                </CardContent>
-              </Card>
-              
+              <GlareCard className="p-0">
+                 <Card className="bg-card/70 shadow-lg w-full h-full">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
+                    <CardDescription>Select a PNG or JPEG to hide your message in.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} className="file:text-primary file:font-bold" />
+                  </CardContent>
+                </Card>
+              </GlareCard>
+
                <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><KeyRound /> 2. Add Secret</CardTitle>
@@ -335,19 +337,15 @@ export function GhostPixelsClient() {
             <div className="space-y-6">
                 <Card className="shadow-lg bg-transparent border-0">
                   <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
-                  <CardContent>
-                    <GlareCard className="flex items-center justify-center p-6">
+                  <CardContent className="p-0">
                       <ImageBox src={originalImageUrl} alt="Original" />
-                    </GlareCard>
                   </CardContent>
                 </Card>
                  <Card className={`shadow-lg bg-transparent border-0 ${!encodedImageUrl ? 'hidden' : ''}`}>
                     <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
-                    <CardContent>
+                    <CardContent className="p-0">
                       <canvas ref={encodedCanvasRef} className="hidden" />
-                      <GlareCard className="flex items-center justify-center p-6">
-                        <ImageBox src={encodedImageUrl} alt="Encoded" />
-                      </GlareCard>
+                      <ImageBox src={encodedImageUrl} alt="Encoded" />
                        {encodedImageUrl && (
                          <a href={encodedImageUrl} download="encoded-image.png" className="mt-4 block">
                             <Button variant="secondary" className="w-full text-md py-5">
@@ -364,16 +362,18 @@ export function GhostPixelsClient() {
         <TabsContent value="decode" className="mt-8">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
               <div className="space-y-6">
-                <Card className="bg-card/70 shadow-lg">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
-                        <CardDescription>Select the PNG image containing the hidden message.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="file:text-primary file:font-bold" />
-                        <canvas ref={stegoCanvasRef} className="hidden" />
-                    </CardContent>
-                </Card>
+                <GlareCard className="p-0">
+                  <Card className="bg-card/70 shadow-lg w-full h-full">
+                      <CardHeader>
+                          <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
+                          <CardDescription>Select the PNG image containing the hidden message.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="file:text-primary file:font-bold" />
+                          <canvas ref={stegoCanvasRef} className="hidden" />
+                      </CardContent>
+                  </Card>
+                </GlareCard>
                 <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
@@ -402,10 +402,8 @@ export function GhostPixelsClient() {
                <div className="space-y-6">
                  <Card className="shadow-lg bg-transparent border-0">
                     <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
-                    <CardContent>
-                       <GlareCard className="flex items-center justify-center p-6">
-                         <ImageBox src={stegoImageUrl} alt="Steganography Image" />
-                       </GlareCard>
+                    <CardContent className="p-0">
+                       <ImageBox src={stegoImageUrl} alt="Steganography Image" />
                     </CardContent>
                  </Card>
                  {decodedMessage && (
