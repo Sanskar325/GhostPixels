@@ -14,10 +14,22 @@ export function LampDemo() {
           duration: 0.8,
           ease: "easeInOut",
         }}
-        className="mt-8 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
+        className="mt-24 bg-gradient-to-br from-slate-300 to-slate-500 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl"
       >
-        GhostPixels <br /> Steganography
+        Hide Secrets <br /> In Plain Sight
       </motion.h1>
+       <motion.p
+          initial={{ opacity: 0, y: 120 }}
+          whileInView={{ opacity: 1, y: 20 }}
+          transition={{
+            delay: 0.5,
+            duration: 0.8,
+            ease: "easeInOut",
+          }}
+          className="mt-4 text-lg text-center text-muted-foreground max-w-xl"
+       >
+        GhostPixels uses the art of steganography to embed your secret messages within images, making them invisible to the naked eye.
+       </motion.p>
     </LampContainer>
   );
 }
