@@ -111,7 +111,6 @@ const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
   );
 };
 
-
 export function GhostPixelsClient() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("encode");
@@ -316,8 +315,8 @@ export function GhostPixelsClient() {
         </TabsList>
 
         <TabsContent value="encode" className="mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-10 gap-8 lg:gap-12">
+            <div className="md:col-span-4 space-y-6">
               <Card className="bg-card/70 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
@@ -373,7 +372,7 @@ export function GhostPixelsClient() {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="md:col-span-6 space-y-6">
                 <CardContainer>
                   <CardBody className="bg-transparent w-full h-full relative">
                       <CardItem translateZ="60" className="w-full">
@@ -407,8 +406,8 @@ export function GhostPixelsClient() {
         </TabsContent>
 
         <TabsContent value="decode" className="mt-8">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              <div className="space-y-6">
+           <div className="grid grid-cols-1 md:grid-cols-10 gap-8 lg:gap-12">
+              <div className="md:col-span-4 space-y-6">
                 <Card className="bg-card/70 shadow-lg">
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
@@ -444,7 +443,7 @@ export function GhostPixelsClient() {
                 </div>
               </div>
 
-               <div className="space-y-6">
+               <div className="md:col-span-6 space-y-6">
                  <CardContainer>
                    <CardBody className="bg-transparent w-full h-full relative">
                      <CardItem translateZ="60" className="w-full">
