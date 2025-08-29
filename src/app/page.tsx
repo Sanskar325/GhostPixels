@@ -10,7 +10,7 @@ export default function Home() {
         </div>
       </header>
       <LampDemo />
-      <main className="flex-1 -mt-[24rem] z-10 mb-16">
+      <main className="flex-1 -mt-[20rem] z-10 mb-16">
         <GhostPixelsClient />
       </main>
       <footer className="bg-card/50 border-t py-6 mt-auto">
