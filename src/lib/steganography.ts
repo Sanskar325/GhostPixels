@@ -7,18 +7,18 @@ function textToBinary(text: string): string {
 }
 
 function binaryToText(binary: string): string {
-  if (binary.length % 8 !== 0) {
-    const remainder = binary.length % 8;
-    binary = '0'.repeat(8 - remainder) + binary;
-  }
-  
   let text = '';
+  // The binary string is already correctly formed by the decoder.
+  // No need for padding here which can corrupt the data for atob.
   for (let i = 0; i < binary.length; i += 8) {
     const byte = binary.substr(i, 8);
-    text += String.fromCharCode(parseInt(byte, 2));
+    if (byte.length === 8) {
+        text += String.fromCharCode(parseInt(byte, 2));
+    }
   }
   return text;
 }
+
 
 export const checkCapacity = (width: number, height: number, bitDepth: number, channel: string, message: string): boolean => {
     const binaryMessage = textToBinary(message) + DELIMITER;
@@ -93,28 +93,22 @@ export const decodeMessage = (
     RGB: [0, 1, 2]
   }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
   
-  const CHUNK_SIZE = 8192; 
-
   for (let i = 0; i < data.length; i += 4) {
     for(const channelIndex of channelsToUse){
         const lsb = data[i + channelIndex] & lsbMask;
-        binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+        const bits = lsb.toString(2).padStart(bitDepth, '0');
+        binaryMessage += bits;
     }
     
-    if (i > 0 && (i / 4) % CHUNK_SIZE === 0) {
-      const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-      if(delimiterIndex !== -1){
-          binaryMessage = binaryMessage.substring(0, delimiterIndex);
-          return binaryToText(binaryMessage);
-      }
+    // Check for the delimiter in the growing string
+    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+    if (delimiterIndex !== -1) {
+      // Delimiter found, truncate and return
+      const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
+      return binaryToText(finalBinaryMessage);
     }
   }
   
-  const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-  if(delimiterIndex !== -1){
-      binaryMessage = binaryMessage.substring(0, delimiterIndex);
-      return binaryToText(binaryMessage);
-  }
-
+  // If we get through the whole image without finding the delimiter
   return ""; 
 };
