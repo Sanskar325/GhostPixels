@@ -275,18 +275,18 @@ export function GhostPixelsClient() {
 
         <TabsContent value="encode" className="mt-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            <div className="space-y-8">
-               <Card className="bg-card/70">
+            <div className="space-y-6">
+               <Card className="bg-card/70 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
                   <CardDescription>Select a PNG or JPEG to hide your message in.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} />
+                  <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} className="file:text-primary file:font-bold" />
                 </CardContent>
               </Card>
               
-               <Card className="bg-card/70">
+               <Card className="bg-card/70 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><KeyRound /> 2. Add Secret</CardTitle>
                   <CardDescription>Provide the message and a password to encrypt it.</CardDescription>
@@ -294,7 +294,7 @@ export function GhostPixelsClient() {
                 <CardContent className="space-y-4">
                   <div>
                     <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your secret message here." />
+                    <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your secret message here..." className="bg-background/50" />
                   </div>
                   <div>
                     <Label htmlFor="password-encode">Password</Label>
@@ -303,7 +303,7 @@ export function GhostPixelsClient() {
                 </CardContent>
               </Card>
               
-              <Card className="bg-card/70">
+              <Card className="bg-card/70 shadow-lg">
                  <CardHeader>
                     <div className="flex justify-between items-start">
                         <div>
@@ -319,29 +319,29 @@ export function GhostPixelsClient() {
               </Card>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button onClick={handleEncode} disabled={isLoading} size="lg" className="flex-1">
+                <Button onClick={handleEncode} disabled={isLoading} size="lg" className="flex-1 text-lg py-6 shadow-xl shadow-primary/20">
                   {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
                   Encode Message
                 </Button>
-                <Button variant="destructive" onClick={() => resetState('encode')} className="flex-1" size="lg">
+                <Button variant="destructive" onClick={() => resetState('encode')} className="flex-1 text-lg py-6" size="lg">
                     <Trash2 className="mr-2 h-4 w-4" /> Reset
                 </Button>
               </div>
             </div>
 
-            <div className="space-y-8">
-                <Card>
+            <div className="space-y-6">
+                <Card className="shadow-lg">
                     <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
                     <CardContent><ImageBox src={originalImageUrl} alt="Original" /></CardContent>
                 </Card>
-                 <Card className={!encodedImageUrl ? 'hidden' : ''}>
+                 <Card className={`shadow-lg ${!encodedImageUrl ? 'hidden' : ''}`}>
                     <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
                     <CardContent>
                       <canvas ref={encodedCanvasRef} className="hidden" />
                       <ImageBox src={encodedImageUrl} alt="Encoded" />
                        {encodedImageUrl && (
                          <a href={encodedImageUrl} download="encoded-image.png" className="mt-4 block">
-                            <Button variant="secondary" className="w-full">
+                            <Button variant="secondary" className="w-full text-md py-5">
                                 <Download className="mr-2 h-4 w-4" /> Download
                             </Button>
                         </a>
@@ -354,18 +354,18 @@ export function GhostPixelsClient() {
 
         <TabsContent value="decode" className="mt-8">
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              <div className="space-y-8">
-                <Card className="bg-card/70">
+              <div className="space-y-6">
+                <Card className="bg-card/70 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
                         <CardDescription>Select the PNG image containing the hidden message.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} />
+                        <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="file:text-primary file:font-bold" />
                         <canvas ref={stegoCanvasRef} className="hidden" />
                     </CardContent>
                 </Card>
-                <Card className="bg-card/70">
+                <Card className="bg-card/70 shadow-lg">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
                         <CardDescription>Provide the password and settings used for encoding.</CardDescription>
@@ -379,25 +379,25 @@ export function GhostPixelsClient() {
                     </CardContent>
                 </Card>
                  <div className="flex flex-col sm:flex-row gap-4">
-                  <Button onClick={handleDecode} disabled={isLoading} className="flex-1" size="lg">
+                  <Button onClick={handleDecode} disabled={isLoading} className="flex-1 text-lg py-6 shadow-xl shadow-primary/20" size="lg">
                       {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
                       Decode Message
                   </Button>
-                  <Button variant="destructive" onClick={() => resetState('decode')} className="flex-1" size="lg">
+                  <Button variant="destructive" onClick={() => resetState('decode')} className="flex-1 text-lg py-6" size="lg">
                       <Trash2 className="mr-2 h-4 w-4" /> Reset
                   </Button>
                 </div>
               </div>
 
-               <div className="space-y-8">
-                 <Card>
+               <div className="space-y-6">
+                 <Card className="shadow-lg">
                     <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
                     <CardContent>
                       <ImageBox src={stegoImageUrl} alt="Steganography Image" />
                     </CardContent>
                  </Card>
                  {decodedMessage && (
-                    <Card>
+                    <Card className="shadow-lg">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
                         <CardContent>
                             <Textarea value={decodedMessage} readOnly className="font-code h-48 bg-muted/50 text-base" />
