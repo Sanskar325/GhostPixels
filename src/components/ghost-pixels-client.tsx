@@ -39,13 +39,84 @@ import { CardContainer, CardBody, CardItem } from "./ui/3d-card";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
+interface PasswordInputProps {
+  id: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+}
+
+const PasswordInput = ({ id, value, onChange }: PasswordInputProps) => {
+  const [showPassword, setShowPassword] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? "text" : "password"}
+        value={value}
+        onChange={onChange}
+        placeholder="Your secret password"
+        className="pr-10 bg-background/50"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+        onClick={() => setShowPassword(!showPassword)}
+      >
+        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+};
+
+interface SettingsControlsProps {
+  bitDepth: number;
+  setBitDepth: (value: number) => void;
+  channel: StegoChannel;
+  setChannel: (value: StegoChannel) => void;
+}
+
+const SettingsControls = ({ bitDepth, setBitDepth, channel, setChannel }: SettingsControlsProps) => {
+  return (
+    <div className="space-y-6 pt-2">
+      <div>
+        <Label>Bit Depth: <span className="text-primary font-bold">{bitDepth}</span></Label>
+        <Slider value={[bitDepth]} onValueChange={(value) => setBitDepth(value[0])} min={1} max={8} step={1} />
+        <p className="text-sm text-muted-foreground mt-2">Higher values store more data but may create visible noise.</p>
+      </div>
+      <div>
+        <Label>Color Channel</Label>
+        <Select value={channel} onValueChange={(value: StegoChannel) => setChannel(value)}>
+          <SelectTrigger><SelectValue placeholder="Select a channel" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="RGB">All (RGB)</SelectItem>
+            <SelectItem value="R">Red</SelectItem>
+            <SelectItem value="G">Green</SelectItem>
+            <SelectItem value="B">Blue</SelectItem>
+          </SelectContent>
+        </Select>
+        <p className="text-sm text-muted-foreground mt-2">Hiding data in a single channel is stealthier.</p>
+      </div>
+    </div>
+  );
+};
+
+const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
+  return (
+    <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
+      {src ? <Image src={src} alt={alt} fill className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
+    </div>
+  );
+};
+
+
 export function GhostPixelsClient() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("encode");
 
   // Common state
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [bitDepth, setBitDepth] = useState(1);
   const [channel, setChannel] = useState<StegoChannel>("RGB");
@@ -89,11 +160,10 @@ export function GhostPixelsClient() {
       setDecodedMessage("");
     }
   };
-  
+
   const resetState = (tab: "encode" | "decode") => {
     setIsLoading(false);
     setPassword("");
-    setShowPassword(false);
     setBitDepth(1);
     setChannel('RGB');
 
@@ -121,7 +191,7 @@ export function GhostPixelsClient() {
     setIsLoading(true);
     try {
       const encryptedMessage = await encryptMessage(message, password);
-      
+
       const img = document.createElement('img');
       img.onload = () => {
         const canvas = encodedCanvasRef.current;
@@ -136,7 +206,7 @@ export function GhostPixelsClient() {
           setIsLoading(false);
           return;
         }
-        
+
         ctx.drawImage(img, 0, 0);
 
         if(!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage)){
@@ -207,57 +277,6 @@ export function GhostPixelsClient() {
     setChannel(settings.recommendedColorChannel as StegoChannel);
     toast({ title: "AI Settings Applied", description: `Rationale: ${settings.rationale}` });
   };
-  
-  const PasswordInput = ({id}: {id: string}) => (
-    <div className="relative">
-      <Input
-        id={id}
-        type={showPassword ? "text" : "password"}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Your secret password"
-        className="pr-10 bg-background/50"
-      />
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
-        onClick={() => setShowPassword(!showPassword)}
-      >
-        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-      </Button>
-    </div>
-  );
-  
-  const SettingsControls = () => (
-      <div className="space-y-6 pt-2">
-          <div>
-              <Label>Bit Depth: <span className="text-primary font-bold">{bitDepth}</span></Label>
-              <Slider value={[bitDepth]} onValueChange={(value) => setBitDepth(value[0])} min={1} max={8} step={1} />
-              <p className="text-sm text-muted-foreground mt-2">Higher values store more data but may create visible noise.</p>
-          </div>
-          <div>
-              <Label>Color Channel</Label>
-              <Select value={channel} onValueChange={(value: StegoChannel) => setChannel(value)}>
-                  <SelectTrigger><SelectValue placeholder="Select a channel" /></SelectTrigger>
-                  <SelectContent>
-                      <SelectItem value="RGB">All (RGB)</SelectItem>
-                      <SelectItem value="R">Red</SelectItem>
-                      <SelectItem value="G">Green</SelectItem>
-                      <SelectItem value="B">Blue</SelectItem>
-                  </SelectContent>
-              </Select>
-               <p className="text-sm text-muted-foreground mt-2">Hiding data in a single channel is stealthier.</p>
-          </div>
-      </div>
-  );
-  
-  const ImageBox = ({src, alt}: {src: string | null, alt: string}) => (
-    <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
-      {src ? <Image src={src} alt={alt} fill className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
-    </div>
-  );
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -299,12 +318,12 @@ export function GhostPixelsClient() {
                   </div>
                   <div>
                     <Label htmlFor="password-encode">Password</Label>
-                    <PasswordInput id="password-encode" />
+                    <PasswordInput id="password-encode" value={password} onChange={(e) => setPassword(e.target.value)} />
                   </div>
                 </CardContent>
                 <Meteors number={10} />
               </Card>
-              
+
               <Card className="bg-card/70 shadow-lg relative overflow-hidden">
                  <CardHeader>
                     <div className="flex justify-between items-start">
@@ -316,7 +335,7 @@ export function GhostPixelsClient() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                  <SettingsControls />
+                  <SettingsControls bitDepth={bitDepth} setBitDepth={setBitDepth} channel={channel} setChannel={setChannel} />
                 </CardContent>
                 <Meteors number={10} />
               </Card>
@@ -386,9 +405,9 @@ export function GhostPixelsClient() {
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="password-decode">Password</Label>
-                            <PasswordInput id="password-decode"/>
+                            <PasswordInput id="password-decode" value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
-                        <SettingsControls />
+                        <SettingsControls bitDepth={bitDepth} setBitDepth={setBitDepth} channel={channel} setChannel={setChannel} />
                     </CardContent>
                     <Meteors number={10} />
                 </Card>
