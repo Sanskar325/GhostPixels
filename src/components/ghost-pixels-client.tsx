@@ -397,26 +397,26 @@ export function GhostPixelsClient() {
             </div>
 
             <div className="space-y-6">
-                <Card className="bg-card/70 shadow-lg">
-                   <CardHeader>
-                        <CardTitle>{encodedImageUrl ? "Encoded Image" : "Original Image"}</CardTitle>
-                   </CardHeader>
-                   <CardContent>
-                        <canvas ref={encodedCanvasRef} className="hidden" />
-                        <CardContainer>
-                            <CardBody>
-                                <CardItem translateZ="60">
-                                    <ImageBox src={encodedImageUrl || originalImageUrl} alt={encodedImageUrl ? "Encoded" : "Original"} />
-                                </CardItem>
-                            </CardBody>
-                        </CardContainer>
-                        {encodedImageUrl && (
-                        <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
-                            <Download className="mr-2 h-4 w-4" /> Download
-                        </Button>
-                        )}
-                   </CardContent>
-                </Card>
+              <Card className="bg-card/70 shadow-lg">
+                <CardHeader>
+                  <CardTitle>{encodedImageUrl ? "Encoded Image" : "Original Image"}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <canvas ref={encodedCanvasRef} className="hidden" />
+                  <CardContainer>
+                    <CardBody>
+                      <CardItem translateZ="60">
+                        <ImageBox src={encodedImageUrl || originalImageUrl} alt={encodedImageUrl ? "Encoded" : "Original"} />
+                      </CardItem>
+                    </CardBody>
+                  </CardContainer>
+                  {encodedImageUrl && (
+                    <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
+                      <Download className="mr-2 h-4 w-4" /> Download
+                    </Button>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </TabsContent>
@@ -475,10 +475,10 @@ export function GhostPixelsClient() {
                   </CardContent>
                 </Card>
                  {decodedMessage && (
-                    <Card className="shadow-lg h-full">
+                    <Card className="shadow-lg">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
-                        <CardContent className="h-full">
-                            <Textarea value={decodedMessage} readOnly className="font-code h-full bg-muted/50 text-base min-h-[200px]" />
+                        <CardContent>
+                            <Textarea value={decodedMessage} readOnly className="font-code bg-muted/50 text-base min-h-[200px]" />
                         </CardContent>
                     </Card>
                  )}
