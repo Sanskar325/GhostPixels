@@ -31,8 +31,8 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-optimizer-dialog";
-import { encryptMessage, decryptMessage } from "../lib/crypto";
-import { encodeMessage, decodeMessage, checkCapacity } from "../lib/steganography";
+import { encryptMessage, decryptMessage } from "@/lib/crypto";
+import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -182,7 +182,7 @@ export function GhostPixelsClient() {
       }
       ctx.drawImage(img, 0, 0);
       try {
-        const extractedMessage = decodeMessage(ctx, img.width, img.height, bitDepth, channel);
+        const extractedMessage = await decodeMessage(ctx, img.width, img.height, bitDepth, channel);
         if (!extractedMessage) {
             throw new Error("No message found or extraction failed.");
         }
@@ -421,3 +421,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    

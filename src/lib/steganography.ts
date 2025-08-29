@@ -80,35 +80,48 @@ export const decodeMessage = (
   height: number,
   bitDepth: number,
   channel: string
-): string => {
-  let binaryMessage = '';
-  const imageData = ctx.getImageData(0, 0, width, height);
-  const data = imageData.data;
-  const lsbMask = (1 << bitDepth) - 1;
+): Promise<string> => {
+    return new Promise((resolve) => {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const lsbMask = (1 << bitDepth) - 1;
 
-  const channelsToUse = {
-    R: [0],
-    G: [1],
-    B: [2],
-    RGB: [0, 1, 2]
-  }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
-  
-  for (let i = 0; i < data.length; i += 4) {
-    for(const channelIndex of channelsToUse){
-        const lsb = data[i + channelIndex] & lsbMask;
-        const bits = lsb.toString(2).padStart(bitDepth, '0');
-        binaryMessage += bits;
-    }
-    
-    // Check for the delimiter in the growing string
-    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-    if (delimiterIndex !== -1) {
-      // Delimiter found, truncate and return
-      const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
-      return binaryToText(finalBinaryMessage);
-    }
-  }
-  
-  // If we get through the whole image without finding the delimiter
-  return ""; 
+        const channelsToUse = {
+            R: [0],
+            G: [1],
+            B: [2],
+            RGB: [0, 1, 2]
+        }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
+        
+        let binaryMessage = '';
+        let i = 0;
+        const chunkSize = 1000; // Process 1000 pixels at a time
+
+        function processChunk() {
+            const limit = Math.min(i + chunkSize * 4, data.length);
+            for (; i < limit; i += 4) {
+                for(const channelIndex of channelsToUse){
+                    const lsb = data[i + channelIndex] & lsbMask;
+                    binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+                }
+                
+                const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+                if (delimiterIndex !== -1) {
+                  const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
+                  resolve(binaryToText(finalBinaryMessage));
+                  return;
+                }
+            }
+
+            if (i < data.length) {
+                setTimeout(processChunk, 0); // Yield to the main thread
+            } else {
+                resolve(""); // Delimiter not found
+            }
+        }
+        
+        processChunk();
+    });
 };
+
+    
