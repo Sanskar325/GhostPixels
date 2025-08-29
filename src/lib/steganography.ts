@@ -81,45 +81,60 @@ export const decodeMessage = (
   bitDepth: number,
   channel: string
 ): Promise<string> => {
-    return new Promise((resolve) => {
-        const imageData = ctx.getImageData(0, 0, width, height);
-        const data = imageData.data;
-        const lsbMask = (1 << bitDepth) - 1;
+    return new Promise((resolve, reject) => {
+        try {
+            const imageData = ctx.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            const lsbMask = (1 << bitDepth) - 1;
 
-        const channelsToUse = {
-            R: [0],
-            G: [1],
-            B: [2],
-            RGB: [0, 1, 2]
-        }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
-        
-        let binaryMessage = '';
-        let i = 0;
-        const chunkSize = 1000; // Process 1000 pixels at a time
+            const channelsToUse = {
+                R: [0],
+                G: [1],
+                B: [2],
+                RGB: [0, 1, 2]
+            }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
+            
+            let binaryMessage = '';
+            let i = 0;
+            const pixelsPerChunk = 5000; // Adjust chunk size based on performance
+            const totalPixels = width * height;
 
-        function processChunk() {
-            const limit = Math.min(i + chunkSize * 4, data.length);
-            for (; i < limit; i += 4) {
-                for(const channelIndex of channelsToUse){
-                    const lsb = data[i + channelIndex] & lsbMask;
-                    binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+            const processChunk = (deadline?: IdleDeadline) => {
+                while ((deadline && deadline.timeRemaining() > 0 || !deadline) && i < data.length) {
+                    for (let p = 0; p < pixelsPerChunk && i < data.length; p++) {
+                        for (const channelIndex of channelsToUse) {
+                            const lsb = data[i + channelIndex] & lsbMask;
+                            binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+                        }
+                        i += 4;
+                    }
+
+                    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+                    if (delimiterIndex !== -1) {
+                        const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
+                        resolve(binaryToText(finalBinaryMessage));
+                        return;
+                    }
                 }
-                
-                const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-                if (delimiterIndex !== -1) {
-                  const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
-                  resolve(binaryToText(finalBinaryMessage));
-                  return;
-                }
-            }
 
-            if (i < data.length) {
-                setTimeout(processChunk, 0); // Yield to the main thread
+                if (i < data.length) {
+                   if (typeof requestIdleCallback === 'function') {
+                     requestIdleCallback(processChunk);
+                   } else {
+                     setTimeout(processChunk, 0);
+                   }
+                } else {
+                    reject(new Error("No message found or extraction failed."));
+                }
+            };
+            
+            if (typeof requestIdleCallback === 'function') {
+                requestIdleCallback(processChunk);
             } else {
-                resolve(""); // Delimiter not found
+                setTimeout(processChunk, 0);
             }
+        } catch (e) {
+            reject(e);
         }
-        
-        processChunk();
     });
 };

@@ -40,9 +40,13 @@ export async function encryptMessage(message: string, password: string): Promise
     encryptedData.set(iv, salt.length);
     encryptedData.set(new Uint8Array(ciphertext), salt.length + iv.length);
 
-    // Convert Uint8Array to a string of characters and then to base64
-    const charString = String.fromCharCode.apply(null, Array.from(encryptedData));
-    return btoa(charString);
+    // More efficient conversion for large arrays
+    let binary = '';
+    const len = encryptedData.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(encryptedData[i]);
+    }
+    return btoa(binary);
   } catch (error) {
     console.error('Encryption failed:', error);
     throw new Error('Encryption failed. Please check the password and try again.');
@@ -52,7 +56,11 @@ export async function encryptMessage(message: string, password: string): Promise
 export async function decryptMessage(encryptedBase64: string, password: string): Promise<string> {
   try {
     const binaryString = atob(encryptedBase64);
-    const encryptedData = new Uint8Array(binaryString.length).map((_, i) => binaryString.charCodeAt(i));
+    const len = binaryString.length;
+    const encryptedData = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+        encryptedData[i] = binaryString.charCodeAt(i);
+    }
     
     if (encryptedData.length < 28) { // 16 for salt + 12 for IV
       throw new Error("Invalid encrypted data format.");
