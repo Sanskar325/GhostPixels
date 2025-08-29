@@ -8,9 +8,8 @@ function textToBinary(text: string): string {
 
 function binaryToText(binary: string): string {
   if (binary.length % 8 !== 0) {
-    console.error("Binary string length is not a multiple of 8");
-    // Trim to the nearest multiple of 8
-    binary = binary.substring(0, binary.length - (binary.length % 8));
+    const remainder = binary.length % 8;
+    binary = '0'.repeat(8 - remainder) + binary;
   }
   
   let text = '';
@@ -57,7 +56,6 @@ export const encodeMessage = (
         if (messageIndex < binaryMessage.length) {
             let bitsToHide = binaryMessage.substring(messageIndex, messageIndex + bitDepth);
             
-            // Pad bits if it's the end of the message and not a full chunk
             if (bitsToHide.length < bitDepth) {
               bitsToHide = bitsToHide.padEnd(bitDepth, '0');
             }
@@ -95,7 +93,7 @@ export const decodeMessage = (
     RGB: [0, 1, 2]
   }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
   
-  const CHUNK_SIZE = 8192; // Process in larger chunks to speed up delimiter search
+  const CHUNK_SIZE = 8192; 
 
   for (let i = 0; i < data.length; i += 4) {
     for(const channelIndex of channelsToUse){
@@ -103,7 +101,6 @@ export const decodeMessage = (
         binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
     }
     
-    // Check for delimiter periodically to avoid building a massive string
     if (i > 0 && (i / 4) % CHUNK_SIZE === 0) {
       const delimiterIndex = binaryMessage.indexOf(DELIMITER);
       if(delimiterIndex !== -1){
@@ -113,12 +110,11 @@ export const decodeMessage = (
     }
   }
   
-  // Final check if delimiter was not found in chunks
   const delimiterIndex = binaryMessage.indexOf(DELIMITER);
   if(delimiterIndex !== -1){
       binaryMessage = binaryMessage.substring(0, delimiterIndex);
       return binaryToText(binaryMessage);
   }
 
-  return ""; // Delimiter not found
+  return ""; 
 };
