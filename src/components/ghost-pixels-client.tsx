@@ -374,7 +374,7 @@ export function GhostPixelsClient() {
 
             <div className="md:col-span-1 space-y-6">
                 <CardContainer>
-                  <CardBody className="bg-transparent w-full h-full relative">
+                  <CardBody className="w-full bg-transparent h-full relative">
                       <CardItem translateZ="60" className="w-full">
                            <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
                            <CardContent>
@@ -384,7 +384,7 @@ export function GhostPixelsClient() {
                   </CardBody>
                 </CardContainer>
                  <CardContainer className={`${!encodedImageUrl ? 'hidden' : ''}`}>
-                   <CardBody className="bg-transparent w-full h-full relative">
+                   <CardBody className="w-full bg-transparent h-full relative">
                       <CardItem translateZ="60" className="w-full">
                           <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
                           <CardContent>
@@ -445,7 +445,7 @@ export function GhostPixelsClient() {
 
                <div className="md:col-span-1 space-y-6">
                  <CardContainer>
-                   <CardBody className="bg-transparent w-full h-full relative">
+                   <CardBody className="w-full bg-transparent h-full relative">
                      <CardItem translateZ="60" className="w-full">
                        <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
                         <CardContent>
