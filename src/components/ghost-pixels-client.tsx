@@ -105,7 +105,11 @@ const SettingsControls = ({ bitDepth, setBitDepth, channel, setChannel }: Settin
 const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
   return (
     <div className="w-full min-h-[300px] lg:min-h-[400px] bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
-      {src ? <Image src={src} alt={alt} width={800} height={600} className="w-full h-full object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
+      {src ? (
+        <Image src={src} alt={alt} width={800} height={600} className="w-full h-full object-contain" />
+      ) : (
+        <FileImage className="w-24 h-24 text-muted-foreground/30" />
+      )}
     </div>
   );
 };
@@ -393,25 +397,19 @@ export function GhostPixelsClient() {
 
             <div className="md:col-span-1 space-y-6">
                 <Card className="bg-card/70 shadow-lg">
-                   <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
+                   <CardHeader>
+                        <CardTitle>{encodedImageUrl ? "Encoded Image" : "Original Image"}</CardTitle>
+                   </CardHeader>
                    <CardContent>
-                    <ImageBox src={originalImageUrl} alt="Original" />
+                        <canvas ref={encodedCanvasRef} className="hidden" />
+                        <ImageBox src={encodedImageUrl || originalImageUrl} alt={encodedImageUrl ? "Encoded" : "Original"} />
+                        {encodedImageUrl && (
+                        <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
+                            <Download className="mr-2 h-4 w-4" /> Download
+                        </Button>
+                        )}
                    </CardContent>
                 </Card>
-                 <div className={`${!encodedImageUrl ? 'hidden' : ''}`}>
-                    <Card className="bg-card/70 shadow-lg">
-                        <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
-                        <CardContent>
-                          <canvas ref={encodedCanvasRef} className="hidden" />
-                          <ImageBox src={encodedImageUrl} alt="Encoded" />
-                           {encodedImageUrl && (
-                             <Button onClick={handleDownload} variant="secondary" className="w-full text-md py-5 mt-4">
-                                <Download className="mr-2 h-4 w-4" /> Download
-                            </Button>
-                          )}
-                        </CardContent>
-                    </Card>
-                </div>
             </div>
           </div>
         </TabsContent>
@@ -483,3 +481,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
