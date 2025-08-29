@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AiOptimizerDialog, type RecommendedSettings } from "@/components/ai-optimizer-dialog";
 import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
+import { CardContainer, CardBody, CardItem } from "@/components/ui/3d-card";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -331,14 +332,28 @@ export function GhostPixelsClient() {
 
             <div className="space-y-6">
                 <Card className="shadow-lg">
-                    <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
-                    <CardContent><ImageBox src={originalImageUrl} alt="Original" /></CardContent>
+                  <CardHeader><CardTitle>Original Image</CardTitle></CardHeader>
+                  <CardContent>
+                    <CardContainer containerClassName="py-0">
+                      <CardBody className="w-full h-auto">
+                        <CardItem translateZ="50" className="w-full">
+                          <ImageBox src={originalImageUrl} alt="Original" />
+                        </CardItem>
+                      </CardBody>
+                    </CardContainer>
+                  </CardContent>
                 </Card>
                  <Card className={`shadow-lg ${!encodedImageUrl ? 'hidden' : ''}`}>
                     <CardHeader><CardTitle>Encoded Image</CardTitle></CardHeader>
                     <CardContent>
                       <canvas ref={encodedCanvasRef} className="hidden" />
-                      <ImageBox src={encodedImageUrl} alt="Encoded" />
+                      <CardContainer containerClassName="py-0">
+                        <CardBody className="w-full h-auto">
+                          <CardItem translateZ="50" className="w-full">
+                            <ImageBox src={encodedImageUrl} alt="Encoded" />
+                          </CardItem>
+                        </CardBody>
+                      </CardContainer>
                        {encodedImageUrl && (
                          <a href={encodedImageUrl} download="encoded-image.png" className="mt-4 block">
                             <Button variant="secondary" className="w-full text-md py-5">
@@ -393,7 +408,13 @@ export function GhostPixelsClient() {
                  <Card className="shadow-lg">
                     <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
                     <CardContent>
-                      <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                       <CardContainer containerClassName="py-0">
+                        <CardBody className="w-full h-auto">
+                          <CardItem translateZ="50" className="w-full">
+                           <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                          </CardItem>
+                        </CardBody>
+                      </CardContainer>
                     </CardContent>
                  </Card>
                  {decodedMessage && (
