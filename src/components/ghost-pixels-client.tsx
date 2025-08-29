@@ -105,7 +105,7 @@ const SettingsControls = ({ bitDepth, setBitDepth, channel, setChannel }: Settin
 
 const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
   return (
-    <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
+    <div className="w-full min-h-[300px] lg:min-h-[400px] bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
       {src ? <Image src={src} alt={alt} fill className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
     </div>
   );
@@ -316,7 +316,7 @@ export function GhostPixelsClient() {
 
         <TabsContent value="encode" className="mt-8">
           <div className="grid grid-cols-1 md:grid-cols-10 gap-8 lg:gap-12">
-            <div className="md:col-span-4 space-y-6">
+            <div className="md:col-span-3 space-y-6">
               <Card className="bg-card/70 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
@@ -372,7 +372,7 @@ export function GhostPixelsClient() {
               </div>
             </div>
 
-            <div className="md:col-span-6 space-y-6">
+            <div className="md:col-span-7 space-y-6">
                 <CardContainer>
                   <CardBody className="bg-transparent w-full h-full relative">
                       <CardItem translateZ="60" className="w-full">
@@ -407,7 +407,7 @@ export function GhostPixelsClient() {
 
         <TabsContent value="decode" className="mt-8">
            <div className="grid grid-cols-1 md:grid-cols-10 gap-8 lg:gap-12">
-              <div className="md:col-span-4 space-y-6">
+              <div className="md:col-span-3 space-y-6">
                 <Card className="bg-card/70 shadow-lg">
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
@@ -443,7 +443,7 @@ export function GhostPixelsClient() {
                 </div>
               </div>
 
-               <div className="md:col-span-6 space-y-6">
+               <div className="md:col-span-7 space-y-6">
                  <CardContainer>
                    <CardBody className="bg-transparent w-full h-full relative">
                      <CardItem translateZ="60" className="w-full">
@@ -476,5 +476,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
