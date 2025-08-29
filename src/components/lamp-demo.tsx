@@ -2,6 +2,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { LampContainer } from "@/components/ui/lamp";
+import WorldMapDemo from "./world-map-demo";
 
 export function LampDemo() {
   return (
@@ -30,6 +31,7 @@ export function LampDemo() {
        >
         GhostPixels uses the art of steganography to embed your secret messages within images, making them invisible to the naked eye.
        </motion.p>
+       <WorldMapDemo />
     </LampContainer>
   );
 }
