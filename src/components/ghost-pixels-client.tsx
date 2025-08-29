@@ -111,6 +111,7 @@ const ImageBox = ({ src, alt }: { src: string | null; alt: string }) => {
   );
 };
 
+
 export function GhostPixelsClient() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("encode");
@@ -191,12 +192,13 @@ export function GhostPixelsClient() {
     setIsLoading(true);
     try {
       const encryptedMessage = await encryptMessage(message, password);
-
       const img = document.createElement('img');
+      
       img.onload = () => {
         const canvas = encodedCanvasRef.current;
         if (!canvas) {
             setIsLoading(false);
+            toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
             return;
         }
         canvas.width = img.width;
@@ -204,6 +206,7 @@ export function GhostPixelsClient() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if(!ctx) {
           setIsLoading(false);
+          toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
           return;
         }
 
@@ -217,15 +220,20 @@ export function GhostPixelsClient() {
 
         encodeMessage(ctx, img.width, img.height, encryptedMessage, bitDepth, channel);
         setEncodedImageUrl(canvas.toDataURL("image/png"));
-
         toast({ title: "Success!", description: "Message successfully hidden in the image." });
+        setIsLoading(false);
       };
+      
+      img.onerror = () => {
+        setIsLoading(false);
+        toast({ variant: "destructive", title: "Image Error", description: "Could not load the image file." });
+      };
+
       img.src = originalImageUrl!;
 
     } catch (error) {
       console.error("Encoding error:", error);
       toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
-    } finally {
       setIsLoading(false);
     }
   };
@@ -243,6 +251,7 @@ export function GhostPixelsClient() {
       const canvas = stegoCanvasRef.current;
       if (!canvas) {
           setIsLoading(false);
+          toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
           return;
       }
       canvas.width = img.width;
@@ -250,6 +259,7 @@ export function GhostPixelsClient() {
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if(!ctx) {
         setIsLoading(false);
+        toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
         return;
       }
       ctx.drawImage(img, 0, 0);
@@ -269,6 +279,12 @@ export function GhostPixelsClient() {
         setIsLoading(false);
       }
     };
+
+    img.onerror = () => {
+        setIsLoading(false);
+        toast({ variant: "destructive", title: "Image Error", description: "Could not load the image file." });
+    };
+
     img.src = stegoImageUrl!;
   };
 
