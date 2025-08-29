@@ -425,11 +425,6 @@ export function GhostPixelsClient() {
                   <CardContent>
                       <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="file:text-primary file:font-bold" />
                       <canvas ref={stegoCanvasRef} className="hidden" />
-                      {stegoImageUrl && (
-                        <div className="mt-4">
-                           <ImageBox src={stegoImageUrl} alt="Steganography Image" />
-                        </div>
-                      )}
                   </CardContent>
                 </Card>
                 <Card className="bg-card/70 shadow-lg relative overflow-hidden">
@@ -458,6 +453,14 @@ export function GhostPixelsClient() {
               </div>
 
                <div className="md:col-span-1 space-y-6">
+                  <Card className="bg-card/70 shadow-lg">
+                    <CardHeader>
+                      <CardTitle>Image to Decode</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ImageBox src={stegoImageUrl} alt="Steganography Image" />
+                    </CardContent>
+                  </Card>
                  {decodedMessage && (
                     <Card className="shadow-lg h-full">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
@@ -480,3 +483,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
