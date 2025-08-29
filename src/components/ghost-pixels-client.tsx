@@ -254,8 +254,8 @@ export function GhostPixelsClient() {
   );
   
   const ImageBox = ({src, alt} : {src: string | null, alt: string}) => (
-     <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative">
-       {src ? <Image src={src} alt={alt} width={500} height={500} className="w-full h-auto object-contain" /> : <FileImage className="w-16 h-16 text-muted-foreground/30" />}
+     <div className="aspect-square bg-muted/20 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-border/50 relative h-96">
+       {src ? <Image src={src} alt={alt} layout="fill" className="object-contain" /> : <FileImage className="w-24 h-24 text-muted-foreground/30" />}
     </div>
   )
 
