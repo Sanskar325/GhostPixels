@@ -426,7 +426,7 @@ export function GhostPixelsClient() {
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="password-decode">Password</Label>
-                            <PasswordInput id="password-decode" value={password} onChange={(e) => setPassword(e.targt.value)} />
+                            <PasswordInput id="password-decode" value={password} onChange={(e) => setPassword(e.target.value)} />
                         </div>
                         <SettingsControls bitDepth={bitDepth} setBitDepth={setBitDepth} channel={channel} setChannel={setChannel} />
                     </CardContent>
