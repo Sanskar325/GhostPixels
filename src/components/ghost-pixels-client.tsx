@@ -13,6 +13,7 @@ import {
   Loader2,
   Eye,
   EyeOff,
+  Settings2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -59,7 +60,6 @@ export function GhostPixelsClient() {
   const [stegoImageUrl, setStegoImageUrl] = useState<string | null>(null);
   const [decodedMessage, setDecodedMessage] = useState("");
 
-  const originalCanvasRef = useRef<HTMLCanvasElement>(null);
   const encodedCanvasRef = useRef<HTMLCanvasElement>(null);
   const stegoCanvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -214,26 +214,59 @@ export function GhostPixelsClient() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         placeholder="Your secret password"
-        className="pr-10"
+        className="pr-10 bg-background/50"
       />
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className="absolute top-0 right-0 h-full px-3"
+        className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
         onClick={() => setShowPassword(!showPassword)}
       >
         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </Button>
     </div>
   );
+  
+  const SettingsCard = () => (
+    <Card>
+      <CardHeader>
+          <div className="flex justify-between items-start">
+              <div>
+                  <CardTitle className="flex items-center gap-2"><Settings2 /> 3. Configure Settings</CardTitle>
+                  <CardDescription>Fine-tune how data is hidden.</CardDescription>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setIsAiOptimizerOpen(true)}><BrainCircuit className="mr-2 h-4 w-4" /> AI Optimizer</Button>
+          </div>
+      </CardHeader>
+      <CardContent className="space-y-6 pt-2">
+          <div>
+              <Label>Bit Depth: {bitDepth}</Label>
+              <Slider value={[bitDepth]} onValueChange={(value) => setBitDepth(value[0])} min={1} max={8} step={1} />
+              <p className="text-sm text-muted-foreground mt-2">Higher values store more data but may create visible noise.</p>
+          </div>
+          <div>
+              <Label>Color Channel</Label>
+              <Select value={channel} onValueChange={(value: StegoChannel) => setChannel(value)}>
+                  <SelectTrigger><SelectValue placeholder="Select a channel" /></SelectTrigger>
+                  <SelectContent>
+                      <SelectItem value="RGB">All (RGB)</SelectItem>
+                      <SelectItem value="R">Red</SelectItem>
+                      <SelectItem value="G">Green</SelectItem>
+                      <SelectItem value="B">Blue</SelectItem>
+                  </SelectContent>
+              </Select>
+          </div>
+      </CardContent>
+    </Card>
+  )
 
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <Tabs value={activeTab} onValueChange={(value) => {
         setActiveTab(value);
         resetState(value as "encode" | "decode");
-      }} className="w-full">
+      }} className="w-full max-w-3xl mx-auto">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="encode">
             <Lock className="mr-2 h-4 w-4" /> Encode
@@ -243,50 +276,104 @@ export function GhostPixelsClient() {
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="encode" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="space-y-6">
-              <Card>
+        <TabsContent value="encode" className="mt-8 space-y-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><FileImage /> 1. Select Image</CardTitle>
+              <CardDescription>Upload a PNG or JPEG image that will hide your message.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} className="bg-background/50" />
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><KeyRound /> 2. Set Secret Message & Password</CardTitle>
+              <CardDescription>Your message will be encrypted with this password.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="message">Message</Label>
+                <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your secret message here." className="bg-background/50" />
+              </div>
+              <div>
+                <Label htmlFor="password-encode">Password</Label>
+                <PasswordInput id="password-encode" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <SettingsCard />
+
+          <Card>
+            <CardHeader>
+              <CardTitle>4. Generate & Compare</CardTitle>
+              <CardDescription>Create your steganographic image and compare it with the original.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <Button onClick={handleEncode} disabled={isLoading} className="flex-1">
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
+                  Encode Message
+                </Button>
+                <Button variant="destructive" onClick={() => resetState('encode')} className="flex-1">
+                    <Trash2 className="mr-2 h-4 w-4" /> Reset
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                      <h3 className="font-semibold mb-2 text-center text-muted-foreground">Original</h3>
+                      <div className="aspect-square bg-muted/30 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed">
+                         {originalImageUrl ? <Image src={originalImageUrl} alt="Original" width={500} height={500} className="w-full h-auto object-contain" /> : <FileImage className="w-16 h-16 text-muted-foreground/50" />}
+                      </div>
+                  </div>
+                   <div>
+                      <h3 className="font-semibold mb-2 text-center text-muted-foreground">Encoded</h3>
+                      <div className="aspect-square bg-muted/30 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed">
+                        <canvas ref={encodedCanvasRef} className="hidden" />
+                         {encodedImageUrl ? <Image src={encodedImageUrl} alt="Encoded" width={500} height={500} className="w-full h-auto object-contain" /> : <FileImage className="w-16 h-16 text-muted-foreground/50" />}
+                      </div>
+                  </div>
+              </div>
+              {encodedImageUrl && (
+                 <a href={encodedImageUrl} download="encoded-image.png" className="mt-6 block">
+                    <Button variant="secondary" className="w-full">
+                        <Download className="mr-2 h-4 w-4" /> Download Encoded Image
+                    </Button>
+                </a>
+              )}
+            </CardContent>
+          </Card>
+
+        </TabsContent>
+
+        <TabsContent value="decode" className="mt-8 space-y-8">
+            <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><FileImage /> 1. Select Image</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
+                    <CardDescription>Select the image containing the hidden message. It must be a PNG file.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} />
-                  {originalImageUrl && <div className="mt-4 rounded-lg overflow-hidden border"><Image src={originalImageUrl} alt="Original" width={400} height={400} className="w-full h-auto object-contain" /></div>}
+                    <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="bg-background/50" />
+                    <canvas ref={stegoCanvasRef} className="hidden" />
+                    {stegoImageUrl && <div className="mt-4 rounded-lg overflow-hidden border-2 border-dashed"><Image src={stegoImageUrl} alt="Steganography Image" width={500} height={500} className="w-full h-auto object-contain" /></div>}
                 </CardContent>
-              </Card>
-
-              <Card>
+            </Card>
+            <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2"><KeyRound /> 2. Set Secret Message & Password</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
+                    <CardDescription>Provide the password and settings that were used during encoding.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea id="message" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type your secret message here." />
-                  </div>
-                  <div>
-                    <Label htmlFor="password-encode">Password</Label>
-                    <PasswordInput id="password-encode" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-start">
-                        <div>
-                            <CardTitle className="flex items-center gap-2"><BrainCircuit /> 3. Configure Settings</CardTitle>
-                            <CardDescription>Fine-tune how data is hidden.</CardDescription>
-                        </div>
-                        <Button variant="outline" size="sm" onClick={() => setIsAiOptimizerOpen(true)}><BrainCircuit className="mr-2 h-4 w-4" /> AI Optimizer</Button>
-                    </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
                     <div>
+                        <Label htmlFor="password-decode">Password</Label>
+                        <PasswordInput id="password-decode"/>
+                    </div>
+                     <div>
                         <Label>Bit Depth: {bitDepth}</Label>
                         <Slider value={[bitDepth]} onValueChange={(value) => setBitDepth(value[0])} min={1} max={8} step={1} />
-                        <p className="text-sm text-muted-foreground">Higher values store more data but may create visible noise.</p>
                     </div>
                     <div>
                         <Label>Color Channel</Label>
@@ -301,116 +388,36 @@ export function GhostPixelsClient() {
                         </Select>
                     </div>
                 </CardContent>
-              </Card>
+            </Card>
 
-              <div className="flex flex-wrap gap-4">
-                <Button onClick={handleEncode} disabled={isLoading} className="flex-1 min-w-[150px]">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Lock className="mr-2 h-4 w-4" />}
-                  Encode Message
-                </Button>
-                <Button variant="destructive" onClick={() => resetState('encode')} className="flex-1 min-w-[150px]">
-                    <Trash2 className="mr-2 h-4 w-4" /> Reset
-                </Button>
-              </div>
-
-            </div>
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Comparison</CardTitle>
-                  <CardDescription>Original vs. Encoded Image</CardDescription>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <h3 className="font-semibold mb-2 text-center">Original</h3>
-                        <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-                           {originalImageUrl ? <Image src={originalImageUrl} alt="Original" width={400} height={400} className="w-full h-auto object-contain" /> : <FileImage className="w-16 h-16 text-muted-foreground" />}
-                        </div>
-                    </div>
-                     <div>
-                        <h3 className="font-semibold mb-2 text-center">Encoded</h3>
-                        <div className="aspect-square bg-muted rounded-lg flex items-center justify-center overflow-hidden">
-                          <canvas ref={encodedCanvasRef} className="hidden" />
-                           {encodedImageUrl ? <Image src={encodedImageUrl} alt="Encoded" width={400} height={400} className="w-full h-auto object-contain" /> : <FileImage className="w-16 h-16 text-muted-foreground" />}
-                        </div>
-                    </div>
-                </CardContent>
-              </Card>
-              {encodedImageUrl && (
-                 <a href={encodedImageUrl} download="encoded-image.png">
-                    <Button variant="secondary" className="w-full">
-                        <Download className="mr-2 h-4 w-4" /> Download Encoded Image
-                    </Button>
-                </a>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="decode" className="mt-6">
-            <div className="max-w-xl mx-auto space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>3. Decode Message</CardTitle>
+                <CardDescription>Extract the secret message from the image.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button onClick={handleDecode} disabled={isLoading} className="flex-1">
+                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
+                      Decode Message
+                  </Button>
+                  <Button variant="destructive" onClick={() => resetState('decode')} className="flex-1">
+                      <Trash2 className="mr-2 h-4 w-4" /> Reset
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            
+             {decodedMessage && (
                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
-                        <CardDescription>Select the image containing the hidden message.</CardDescription>
-                    </CardHeader>
+                    <CardHeader><CardTitle>Extracted Message</CardTitle></CardHeader>
                     <CardContent>
-                        <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} />
-                        <canvas ref={stegoCanvasRef} className="hidden" />
-                        {stegoImageUrl && <div className="mt-4 rounded-lg overflow-hidden border"><Image src={stegoImageUrl} alt="Steganography Image" width={400} height={400} className="w-full h-auto object-contain" /></div>}
+                        <Textarea value={decodedMessage} readOnly className="font-code h-48 bg-muted/50 text-base" />
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
-                        <CardDescription>The password and settings used during encoding.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <Label htmlFor="password-decode">Password</Label>
-                            <PasswordInput id="password-decode"/>
-                        </div>
-                         <div>
-                            <Label>Bit Depth: {bitDepth}</Label>
-                            <Slider value={[bitDepth]} onValueChange={(value) => setBitDepth(value[0])} min={1} max={8} step={1} />
-                        </div>
-                        <div>
-                            <Label>Color Channel</Label>
-                            <Select value={channel} onValueChange={(value: StegoChannel) => setChannel(value)}>
-                                <SelectTrigger><SelectValue placeholder="Select a channel" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="RGB">All (RGB)</SelectItem>
-                                    <SelectItem value="R">Red</SelectItem>
-                                    <SelectItem value="G">Green</SelectItem>
-                                    <SelectItem value="B">Blue</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                    </CardContent>
-                </Card>
-
-                 <div className="flex flex-wrap gap-4">
-                    <Button onClick={handleDecode} disabled={isLoading} className="flex-1 min-w-[150px]">
-                        {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Unlock className="mr-2 h-4 w-4" />}
-                        Decode Message
-                    </Button>
-                    <Button variant="destructive" onClick={() => resetState('decode')} className="flex-1 min-w-[150px]">
-                        <Trash2 className="mr-2 h-4 w-4" /> Reset
-                    </Button>
-                 </div>
-                
-                 {decodedMessage && (
-                    <Card>
-                        <CardHeader><CardTitle>Extracted Message</CardTitle></CardHeader>
-                        <CardContent>
-                            <Textarea value={decodedMessage} readOnly className="font-code h-48 bg-muted/50" />
-                        </CardContent>
-                    </Card>
-                 )}
-            </div>
+             )}
         </TabsContent>
       </Tabs>
-      <canvas ref={originalCanvasRef} className="hidden" />
       <AiOptimizerDialog
         isOpen={isAiOptimizerOpen}
         onClose={() => setIsAiOptimizerOpen(false)}
