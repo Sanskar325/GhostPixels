@@ -275,8 +275,8 @@ export function GhostPixelsClient() {
         </TabsList>
 
         <TabsContent value="encode" className="mt-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12">
+            <div className="space-y-6 md:col-span-2">
               <Card className="bg-card/70 shadow-lg">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
@@ -332,7 +332,7 @@ export function GhostPixelsClient() {
               </div>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 md:col-span-3">
                 <CardContainer>
                   <CardBody className="bg-transparent w-full h-full relative">
                       <CardItem translateZ="60" className="w-full">
@@ -366,8 +366,8 @@ export function GhostPixelsClient() {
         </TabsContent>
 
         <TabsContent value="decode" className="mt-8">
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-              <div className="space-y-6">
+           <div className="grid grid-cols-1 md:grid-cols-5 gap-8 lg:gap-12">
+              <div className="space-y-6 md:col-span-2">
                 <Card className="bg-card/70 shadow-lg">
                   <CardHeader>
                       <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
@@ -403,14 +403,14 @@ export function GhostPixelsClient() {
                 </div>
               </div>
 
-               <div className="space-y-6">
+               <div className="space-y-6 md:col-span-3">
                  <CardContainer>
                    <CardBody className="bg-transparent w-full h-full relative">
                      <CardItem translateZ="60" className="w-full">
                        <CardHeader><CardTitle>Image to Decode</CardTitle></CardHeader>
                         <CardContent>
                            <ImageBox src={stegoImageUrl} alt="Steganography Image" />
-                        </CardContent>
+                        </dCardContent>
                      </CardItem>
                    </CardBody>
                  </CardContainer>
