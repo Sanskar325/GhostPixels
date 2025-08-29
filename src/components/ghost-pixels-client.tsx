@@ -14,7 +14,6 @@ import {
   Eye,
   EyeOff,
   Settings2,
-  ArrowRight,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
