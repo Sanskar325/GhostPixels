@@ -38,7 +38,7 @@ interface AuthFormProps {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { login } = useAuth();
+  const { login, getUserByEmail } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const isSignup = mode === 'signup';
 
@@ -55,20 +55,34 @@ export function AuthForm({ mode }: AuthFormProps) {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const userData = isSignup ? {
-        firstName: (data as z.infer<typeof signupSchema>).firstName,
-        lastName: (data as z.infer<typeof signupSchema>).lastName,
-        email: data.email,
-        avatar: `https://ui-avatars.com/api/?name=${(data as z.infer<typeof signupSchema>).firstName}+${(data as z.infer<typeof signupSchema>).lastName}&background=random&color=fff`
-    } : {
-        // In a real app, you'd fetch this from your DB
-        firstName: 'Test',
-        lastName: 'User',
-        email: data.email,
-        avatar: `https://ui-avatars.com/api/?name=Test+User&background=random&color=fff`
+    let userData;
+
+    if (isSignup) {
+        const signupData = data as z.infer<typeof signupSchema>;
+        userData = {
+            firstName: signupData.firstName,
+            lastName: signupData.lastName,
+            email: signupData.email,
+            avatar: `https://ui-avatars.com/api/?name=${signupData.firstName}+${signupData.lastName}&background=random&color=fff`
+        };
+        login(userData, true); // True to indicate new user signup
+    } else {
+        const loginData = data as z.infer<typeof loginSchema>;
+        userData = getUserByEmail(loginData.email);
+
+        if (!userData) {
+            toast({
+              variant: 'destructive',
+              title: 'Login Failed',
+              description: 'No account found with that email address.',
+            });
+            setIsLoading(false);
+            return;
+        }
+        // In a real app, you would also verify the password here.
+        login(userData, false);
     }
 
-    login(userData);
 
     toast({
       title: isSignup ? 'Signup Successful' : 'Login Successful',
