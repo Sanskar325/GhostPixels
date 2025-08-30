@@ -52,7 +52,7 @@ export const EvervaultCard = ({
                 <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-foreground" />
                 <Icon className="absolute h-6 w-6 -top-3 -right-3 text-foreground" />
                 <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-foreground" />
-                <div className="relative z-10 w-full h-full overflow-auto">
+                <div className="relative z-10 w-full h-full max-h-[250px] overflow-auto">
                    <p className="dark:text-white text-black z-20 whitespace-pre-wrap text-left text-sm font-mono">{text}</p>
                 </div>
             </div>

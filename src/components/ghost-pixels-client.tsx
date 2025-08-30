@@ -458,7 +458,7 @@ export function GhostPixelsClient() {
                       <CardTitle>Revealed Message</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="w-full max-h-[250px] overflow-auto">
+                      <div className="w-full">
                           <EvervaultCard text={decodedMessage} />
                       </div>
                     </CardContent>
@@ -495,5 +495,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
