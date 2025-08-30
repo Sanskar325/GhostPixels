@@ -1,5 +1,6 @@
 import { GhostPixelsClient } from "@/components/ghost-pixels-client";
 import { LampDemo } from "@/components/lamp-demo";
+import FollowingPointerDemo from "@/components/following-pointer-demo";
 
 export default function Home() {
   return (
@@ -18,6 +19,9 @@ export default function Home() {
             </p>
         </section>
         <GhostPixelsClient />
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 mb-8 text-center">
+          <FollowingPointerDemo />
+        </section>
       </main>
       <footer className="bg-card/50 border-t py-6 mt-auto">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center text-muted-foreground text-sm">
