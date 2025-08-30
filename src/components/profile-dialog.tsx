@@ -15,8 +15,8 @@ export function ProfileDialog({ isOpen, onOpenChange }: ProfileDialogProps) {
              <DialogOverlay className="backdrop-blur-sm" />
              <DialogContent className="bg-transparent p-0 border-0 shadow-none max-w-2xl">
                  <DialogTitle className="sr-only">Profile Settings</DialogTitle>
-                 <DialogDescription className="sr-only">View and edit your profile information.</DialogDescription>
-                 <ProfileForm />
+                 <DialogDescription className="sr-only">View, edit your profile information, or change your password.</DialogDescription>
+                 <ProfileForm onDone={() => onOpenChange(false)} />
              </DialogContent>
         </Dialog>
     )

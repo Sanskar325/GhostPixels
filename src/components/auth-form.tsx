@@ -7,13 +7,42 @@ import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, LogIn, UserPlus, ArrowRight } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
+
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    id: string;
+}
+const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(({ id, ...props }, ref) => {
+  const [showPassword, setShowPassword] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? "text" : "password"}
+        ref={ref}
+        {...props}
+        className="pr-10 bg-input/50"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+        onClick={() => setShowPassword(!showPassword)}
+        tabIndex={-1}
+      >
+        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+});
+PasswordInput.displayName = 'PasswordInput';
 
 const signupSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }),
@@ -101,7 +130,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   const footerLinkText = isSignup ? 'Log in' : 'Sign up';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+    <div className="flex min-h-screen items-center justify-center bg-transparent p-4">
        <Card className="w-full max-w-lg bg-card/70 shadow-2xl shadow-primary/10">
         <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight">{title}</CardTitle>
@@ -130,13 +159,13 @@ export function AuthForm({ mode }: AuthFormProps) {
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" placeholder="••••••••" {...register('password')} className="bg-input/50"/>
+                    <PasswordInput id="password" placeholder="••••••••" {...register('password')} />
                     {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
                 </div>
                  {isSignup && (
                     <div className="space-y-2">
                         <Label htmlFor="confirmPassword">Confirm Password</Label>
-                        <Input id="confirmPassword" type="password" placeholder="••••••••" {...register('confirmPassword')} className="bg-input/50"/>
+                        <PasswordInput id="confirmPassword" placeholder="••••••••" {...register('confirmPassword')} />
                         {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{(errors as any).confirmPassword.message}</p>}
                     </div>
                 )}

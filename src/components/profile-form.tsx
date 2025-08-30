@@ -1,13 +1,12 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save, KeyRound, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,24 +15,82 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from './ui/skeleton';
+import { Separator } from './ui/separator';
+
+interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+    id: string;
+}
+const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(({ id, ...props }, ref) => {
+  const [showPassword, setShowPassword] = useState(false);
+  return (
+    <div className="relative">
+      <Input
+        id={id}
+        type={showPassword ? "text" : "password"}
+        ref={ref}
+        {...props}
+        className="pr-10 bg-input/50"
+      />
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="absolute top-0 right-0 h-full px-3 text-muted-foreground hover:text-foreground"
+        onClick={() => setShowPassword(!showPassword)}
+        tabIndex={-1}
+      >
+        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      </Button>
+    </div>
+  );
+});
+PasswordInput.displayName = 'PasswordInput';
+
 
 const profileSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }),
   lastName: z.string().min(1, { message: 'Last name is required.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   avatar: z.string().url().optional().or(z.literal('')),
+  currentPassword: z.string().optional(),
+  newPassword: z.string().optional(),
+  confirmNewPassword: z.string().optional(),
+}).refine(data => {
+    if (data.newPassword && data.newPassword.length > 0 && data.newPassword.length < 8) {
+        return false;
+    }
+    return true;
+}, {
+    message: "New password must be at least 8 characters long.",
+    path: ["newPassword"],
+}).refine(data => {
+    // If one password field is filled, all should be
+    if (data.newPassword || data.currentPassword || data.confirmNewPassword) {
+        return data.newPassword && data.currentPassword && data.confirmNewPassword;
+    }
+    return true;
+}, {
+    message: "All password fields are required to change password.",
+    path: ["currentPassword"], // You can decide where to show this error
+}).refine(data => data.newPassword === data.confirmNewPassword, {
+  message: "New passwords don't match",
+  path: ["confirmNewPassword"],
 });
 
 type FormValues = z.infer<typeof profileSchema>;
 
-export function ProfileForm() {
-  const router = useRouter();
+interface ProfileFormProps {
+    onDone: () => void;
+}
+
+export function ProfileForm({ onDone }: ProfileFormProps) {
   const { toast } = useToast();
   const { user, updateUser, isLoading: isAuthLoading } = useAuth();
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors }, reset, formState } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
+    mode: "onChange"
   });
 
   useEffect(() => {
@@ -44,19 +101,39 @@ export function ProfileForm() {
 
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    setIsLoading(true);
+    setIsUpdating(true);
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
-    updateUser(data);
+    const {currentPassword, newPassword, ...profileData} = data;
+    
+    let success = true;
+    let toastDescription = "Your information has been successfully updated.";
 
-    toast({
-      title: 'Profile Updated',
-      description: `Your information has been successfully updated.`,
-    });
+    // Simulate password change logic
+    if (currentPassword && newPassword) {
+        // In a real app, you would verify the current password here.
+        console.log("Simulating password change...");
+        toastDescription += " Your password has also been changed.";
+    }
 
-    setIsLoading(false);
+    if (success) {
+        updateUser(profileData);
+        toast({
+          title: 'Profile Updated',
+          description: toastDescription,
+        });
+        onDone();
+    } else {
+         toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: "Could not update profile. Please try again.",
+        });
+    }
+
+    setIsUpdating(false);
   };
 
   if (isAuthLoading) {
@@ -92,18 +169,18 @@ export function ProfileForm() {
 
   if (!user) {
     return (
-        <div className="text-center">
+        <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10 p-8 text-center">
             <p>You must be logged in to view this page.</p>
             <Button asChild className="mt-4">
                 <Link href="/login">Log In</Link>
             </Button>
-        </div>
+        </Card>
     )
   }
 
 
   return (
-    <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10">
+    <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl shadow-primary/10">
     <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader className="items-center text-center">
              <Avatar className="h-24 w-24 text-4xl">
@@ -136,10 +213,34 @@ export function ProfileForm() {
                 <Input id="avatar" type="text" {...register('avatar')} placeholder="https://example.com/avatar.png" className="bg-input/50"/>
                 {errors.avatar && <p className="text-sm text-destructive mt-1">{errors.avatar.message}</p>}
             </div>
+            <Separator className="my-6" />
+            <div>
+                <h3 className="text-lg font-medium flex items-center gap-2"><KeyRound/> Change Password</h3>
+                <p className="text-sm text-muted-foreground">Leave these fields blank to keep your current password.</p>
+            </div>
+            <div className="space-y-4">
+                 <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <PasswordInput id="currentPassword" {...register('currentPassword')} placeholder="••••••••" />
+                    {errors.currentPassword && <p className="text-sm text-destructive mt-1">{errors.currentPassword.message}</p>}
+                </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <Label htmlFor="newPassword">New Password</Label>
+                        <PasswordInput id="newPassword" {...register('newPassword')} placeholder="••••••••" />
+                        {errors.newPassword && <p className="text-sm text-destructive mt-1">{errors.newPassword.message}</p>}
+                    </div>
+                     <div className="space-y-2">
+                        <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                        <PasswordInput id="confirmNewPassword" {...register('confirmNewPassword')} placeholder="••••••••" />
+                        {errors.confirmNewPassword && <p className="text-sm text-destructive mt-1">{errors.confirmNewPassword.message}</p>}
+                    </div>
+                </div>
+            </div>
         </CardContent>
         <CardFooter>
-            <Button type="submit" disabled={isLoading} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" /> }
+            <Button type="submit" disabled={isUpdating || !formState.isDirty} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
+                {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" /> }
                 Save Changes
             </Button>
         </CardFooter>
