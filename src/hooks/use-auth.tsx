@@ -28,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 let userDatabase: User[] = [];
 
 const loadDatabase = () => {
+    if (typeof window === 'undefined') return;
     try {
         const storedDb = localStorage.getItem('user_database');
         if (storedDb) {
@@ -43,15 +44,9 @@ const loadDatabase = () => {
 }
 
 const saveDatabase = () => {
+    if (typeof window === 'undefined') return;
     localStorage.setItem('user_database', JSON.stringify(userDatabase));
 }
-
-// Erase data for a fresh start
-if (typeof window !== 'undefined') {
-    localStorage.removeItem('user_database');
-    localStorage.removeItem('user');
-}
-
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
