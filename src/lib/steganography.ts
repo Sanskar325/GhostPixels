@@ -97,18 +97,30 @@ export const decodeMessage = (
             
             let binaryMessage = '';
             
+            // The number of pixels to check before searching for the delimiter.
+            // A larger number is more performant but uses more memory.
+            const checkInterval = 10000;
+            const delimiterSearchLength = DELIMITER.length * 2;
+
             for (let i = 0; i < data.length; i += 4) {
                 for (const channelIndex of channelsToUse) {
                     const lsb = data[i + channelIndex] & lsbMask;
                     binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
                 }
-                 // Optimization: Check for delimiter periodically to avoid building a huge string
-                 const delimiterIndexCheck = binaryMessage.indexOf(DELIMITER);
-                 if (delimiterIndexCheck !== -1) {
-                     const finalBinaryMessage = binaryMessage.substring(0, delimiterIndexCheck);
-                     resolve(binaryToText(finalBinaryMessage));
-                     return; // Exit once found
-                 }
+
+                // Optimization: Check for delimiter periodically to avoid building a huge string and blocking the main thread.
+                if (i > 0 && (i / 4) % checkInterval === 0) {
+                     const delimiterIndexCheck = binaryMessage.indexOf(DELIMITER);
+                     if (delimiterIndexCheck !== -1) {
+                         const finalBinaryMessage = binaryMessage.substring(0, delimiterIndexCheck);
+                         resolve(binaryToText(finalBinaryMessage));
+                         return; // Exit once found
+                     }
+                     // Keep the tail of the string to check for delimiters that span chunks
+                     if(binaryMessage.length > delimiterSearchLength) {
+                         binaryMessage = binaryMessage.slice(binaryMessage.length - delimiterSearchLength);
+                     }
+                }
             }
             
             // Final check in case the delimiter is at the very end
