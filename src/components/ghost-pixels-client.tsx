@@ -347,7 +347,7 @@ export function GhostPixelsClient() {
                   <CardTitle className="flex items-center gap-2"><FileImage /> 1. Upload Image</CardTitle>
                   <CardDescription>Select a PNG or JPEG to hide your message in.</CardDescription>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="!p-2">
                   <FileUpload onChange={(files) => handleImageChange(files, 'original')} />
                 </CardContent>
               </Card>
@@ -430,7 +430,7 @@ export function GhostPixelsClient() {
                       <CardTitle className="flex items-center gap-2"><FileImage/> 1. Upload Stego-Image</CardTitle>
                       <CardDescription>Select the PNG image containing the hidden message.</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="!p-2">
                       <FileUpload onChange={(files) => handleImageChange(files, 'stego')} />
                       <canvas ref={stegoCanvasRef} className="hidden" />
                   </CardContent>
