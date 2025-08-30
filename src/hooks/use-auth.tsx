@@ -8,13 +8,15 @@ interface User {
   lastName: string;
   email: string;
   avatar?: string;
+  password?: string; // Add password to the user interface
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (userData: User, isNewUser?: boolean) => void;
+  login: (userData: Omit<User, 'firstName'|'lastName'>, isNewUser?: boolean) => boolean;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
+  updatePassword: (oldPass: string, newPass: string) => boolean;
   getUserByEmail: (email: string) => User | null;
   isLoading: boolean;
 }
@@ -30,6 +32,9 @@ const loadDatabase = () => {
         const storedDb = localStorage.getItem('user_database');
         if (storedDb) {
             userDatabase = JSON.parse(storedDb);
+        } else {
+            // Start with a fresh DB if none exists
+            userDatabase = [];
         }
     } catch (error) {
         console.error("Failed to parse user database from localStorage", error);
@@ -40,6 +45,13 @@ const loadDatabase = () => {
 const saveDatabase = () => {
     localStorage.setItem('user_database', JSON.stringify(userDatabase));
 }
+
+// Erase data for a fresh start
+if (typeof window !== 'undefined') {
+    localStorage.removeItem('user_database');
+    localStorage.removeItem('user');
+}
+
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -59,16 +71,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(false);
   }, []);
 
-  const login = (userData: User, isNewUser: boolean = false) => {
+  const login = (userData: User, isNewUser: boolean = false): boolean => {
     if (isNewUser) {
-        // Add to our simulated DB if they don't exist
         if (!userDatabase.find(u => u.email === userData.email)) {
             userDatabase.push(userData);
             saveDatabase();
         }
+        localStorage.setItem('user', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+    } else {
+        const foundUser = getUserByEmail(userData.email);
+        if (foundUser && foundUser.password === userData.password) {
+            localStorage.setItem('user', JSON.stringify(foundUser));
+            setUser(foundUser);
+            return true;
+        }
+        return false;
     }
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);
   };
 
   const logout = () => {
@@ -82,7 +102,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(updatedUser);
         localStorage.setItem('user', JSON.stringify(updatedUser));
 
-        // Update in the database as well
         const dbIndex = userDatabase.findIndex(u => u.email === user.email);
         if (dbIndex > -1) {
             userDatabase[dbIndex] = { ...userDatabase[dbIndex], ...userData};
@@ -91,12 +110,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
+  const updatePassword = (oldPass: string, newPass: string): boolean => {
+    if(user && user.password === oldPass) {
+        updateUser({ password: newPass });
+        return true;
+    }
+    return false;
+  }
+
   const getUserByEmail = (email: string): User | null => {
     return userDatabase.find(u => u.email === email) || null;
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateUser, getUserByEmail, isLoading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, getUserByEmail, updatePassword, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

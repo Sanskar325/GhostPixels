@@ -65,15 +65,21 @@ const profileSchema = z.object({
     message: "New password must be at least 8 characters long.",
     path: ["newPassword"],
 }).refine(data => {
-    // If one password field is filled, all should be
+    // If one password field is filled, all should be filled
     if (data.newPassword || data.currentPassword || data.confirmNewPassword) {
-        return !!(data.newPassword && data.currentPassword && data.confirmNewPassword);
+        const allFilled = !!(data.currentPassword && data.newPassword && data.confirmNewPassword);
+        if (!allFilled) return false;
     }
     return true;
 }, {
     message: "All password fields are required to change password.",
-    path: ["currentPassword"], // You can decide where to show this error
-}).refine(data => data.newPassword === data.confirmNewPassword, {
+    path: ["currentPassword"], // Show error on the first password field
+}).refine(data => {
+    if (data.newPassword && data.confirmNewPassword) {
+        return data.newPassword === data.confirmNewPassword;
+    }
+    return true;
+}, {
   message: "New passwords don't match",
   path: ["confirmNewPassword"],
 });
@@ -86,60 +92,74 @@ interface ProfileFormProps {
 
 export function ProfileForm({ onDone }: ProfileFormProps) {
   const { toast } = useToast();
-  const { user, updateUser, isLoading: isAuthLoading } = useAuth();
+  const { user, updateUser, updatePassword, isLoading: isAuthLoading } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { register, handleSubmit, formState: { errors }, reset, formState } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors, isDirty }, reset } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
     mode: "onChange"
   });
 
   useEffect(() => {
     if (user) {
-      reset(user);
+      reset({ ...user, currentPassword: '', newPassword: '', confirmNewPassword: '' });
     }
   }, [user, reset]);
 
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsUpdating(true);
-    
-    // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     const {currentPassword, newPassword, ...profileData} = data;
     
-    let success = true;
-    let toastDescription = "Your information has been successfully updated.";
+    let infoUpdated = false;
+    let passwordUpdated = false;
+    let updateError: string | null = null;
+    
+    // Check if only profile info (not password) has changed
+    const profileInfoChanged = (user?.firstName !== data.firstName) || (user?.lastName !== data.lastName) || (user?.email !== data.email) || (user?.avatar !== data.avatar);
 
-    // Simulate password change logic
-    if (currentPassword && newPassword) {
-        // In a real app, you would verify the current password here.
-        console.log("Simulating password change...");
-        toastDescription += " Your password has also been changed.";
-    }
-
-    if (success) {
+    if (profileInfoChanged) {
         updateUser(profileData);
-        toast({
-          title: 'Profile Updated',
-          description: toastDescription,
-        });
-        onDone();
-    } else {
-         toast({
-            variant: 'destructive',
-            title: 'Update Failed',
-            description: "Could not update profile. Please try again.",
-        });
+        infoUpdated = true;
+    }
+    
+    if (currentPassword && newPassword) {
+        const passwordChangeSuccess = updatePassword(currentPassword, newPassword);
+        if (passwordChangeSuccess) {
+            passwordUpdated = true;
+        } else {
+            updateError = "Your current password was incorrect.";
+        }
     }
 
     setIsUpdating(false);
+
+    if (updateError) {
+        toast({
+            variant: 'destructive',
+            title: 'Update Failed',
+            description: updateError,
+        });
+    } else if (infoUpdated || passwordUpdated) {
+        let toastDescription = "";
+        if (infoUpdated) toastDescription += "Your profile information was updated. ";
+        if (passwordUpdated) toastDescription += "Your password has been changed.";
+        toast({
+          title: 'Profile Updated',
+          description: toastDescription.trim(),
+        });
+        onDone();
+    } else {
+        // Nothing changed, just close the dialog
+        onDone();
+    }
   };
 
   if (isAuthLoading) {
     return (
-        <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10">
+        <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10 backdrop-blur-sm">
             <CardHeader className="items-center text-center">
                 <Skeleton className="h-24 w-24 rounded-full" />
                 <Skeleton className="h-8 w-48 mt-4" />
@@ -170,7 +190,7 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
 
   if (!user) {
     return (
-        <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10 p-8 text-center">
+        <Card className="w-full max-w-2xl bg-card/70 shadow-2xl shadow-primary/10 p-8 text-center backdrop-blur-sm">
             <p>You must be logged in to view this page.</p>
             <Button asChild className="mt-4">
                 <Link href="/login">Log In</Link>
@@ -178,7 +198,6 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
         </Card>
     )
   }
-
 
   return (
     <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl shadow-primary/10 flex flex-col max-h-[90vh]">
@@ -191,8 +210,8 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
             <CardTitle className="text-3xl font-bold tracking-tight">{user.firstName} {user.lastName}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
         </CardHeader>
-        <ScrollArea className="flex-1 px-6">
-          <CardContent className="pt-0 space-y-6">
+        <ScrollArea className="flex-1">
+          <CardContent className="px-6 pt-0 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                       <Label htmlFor="firstName">First name</Label>
@@ -241,8 +260,8 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
               </div>
           </CardContent>
         </ScrollArea>
-        <CardFooter className="pt-6">
-            <Button type="submit" disabled={isUpdating || !formState.isDirty} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
+        <CardFooter className="pt-6 px-6">
+            <Button type="submit" disabled={isUpdating || !isDirty} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
                 {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" /> }
                 Save Changes
             </Button>

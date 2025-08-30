@@ -80,26 +80,37 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    let userData;
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    let success = false;
+    let welcomeName = '';
 
     if (isSignup) {
         const signupData = data as z.infer<typeof signupSchema>;
-        userData = {
+        const existingUser = getUserByEmail(signupData.email);
+        if (existingUser) {
+            toast({
+                variant: 'destructive',
+                title: 'Signup Failed',
+                description: 'An account with this email already exists.',
+            });
+            setIsLoading(false);
+            return;
+        }
+        
+        success = login({
             firstName: signupData.firstName,
             lastName: signupData.lastName,
             email: signupData.email,
+            password: signupData.password,
             avatar: `https://ui-avatars.com/api/?name=${signupData.firstName}+${signupData.lastName}&background=random&color=fff`
-        };
-        login(userData, true); // True to indicate new user signup
+        }, true);
+        welcomeName = signupData.firstName;
     } else {
         const loginData = data as z.infer<typeof loginSchema>;
-        userData = getUserByEmail(loginData.email);
+        const userToLogin = getUserByEmail(loginData.email);
 
-        if (!userData) {
+        if (!userToLogin) {
             toast({
               variant: 'destructive',
               title: 'Login Failed',
@@ -108,18 +119,34 @@ export function AuthForm({ mode }: AuthFormProps) {
             setIsLoading(false);
             return;
         }
-        // In a real app, you would also verify the password here.
-        login(userData, false);
+        
+        success = login({
+            email: loginData.email,
+            password: loginData.password,
+        }, false);
+
+        if (success) {
+            welcomeName = userToLogin.firstName;
+        } else {
+             toast({
+              variant: 'destructive',
+              title: 'Login Failed',
+              description: 'Incorrect password. Please try again.',
+            });
+            setIsLoading(false);
+            return;
+        }
     }
 
-
-    toast({
-      title: isSignup ? 'Signup Successful' : 'Login Successful',
-      description: `Welcome, ${userData.firstName}! You have been successfully ${isSignup ? 'signed up' : 'logged in'}. Redirecting...`,
-    });
+    if (success) {
+        toast({
+          title: isSignup ? 'Signup Successful' : 'Login Successful',
+          description: `Welcome, ${welcomeName}! You have been successfully ${isSignup ? 'signed up' : 'logged in'}.`,
+        });
+        router.push('/');
+    }
 
     setIsLoading(false);
-    router.push('/');
   };
 
   const title = isSignup ? 'Welcome to GhostPixels' : 'Welcome Back';
@@ -131,7 +158,7 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-transparent p-4">
-       <Card className="w-full max-w-lg bg-card/70 shadow-2xl shadow-primary/10">
+       <Card className="w-full max-w-lg bg-card/70 shadow-2xl shadow-primary/10 backdrop-blur-sm">
         <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
