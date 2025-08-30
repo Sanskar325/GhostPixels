@@ -57,6 +57,7 @@ const profileSchema = z.object({
   newPassword: z.string().optional(),
   confirmNewPassword: z.string().optional(),
 }).refine(data => {
+    // If new password is being set, it must be at least 8 characters.
     if (data.newPassword && data.newPassword.length > 0 && data.newPassword.length < 8) {
         return false;
     }
@@ -65,22 +66,22 @@ const profileSchema = z.object({
     message: "New password must be at least 8 characters long.",
     path: ["newPassword"],
 }).refine(data => {
-    // If one password field is filled, all should be filled
+    // If one of the password fields is filled, all three must be filled.
     if (data.newPassword || data.currentPassword || data.confirmNewPassword) {
-        const allFilled = !!(data.currentPassword && data.newPassword && data.confirmNewPassword);
-        if (!allFilled) return false;
+        return !!(data.currentPassword && data.newPassword && data.confirmNewPassword);
     }
     return true;
 }, {
-    message: "All password fields are required to change password.",
-    path: ["currentPassword"], // Show error on the first password field
+    message: "All password fields are required to change your password.",
+    path: ["currentPassword"], 
 }).refine(data => {
+    // If new password and confirmation are filled, they must match.
     if (data.newPassword && data.confirmNewPassword) {
         return data.newPassword === data.confirmNewPassword;
     }
     return true;
 }, {
-  message: "New passwords don't match",
+  message: "New passwords don't match.",
   path: ["confirmNewPassword"],
 });
 
@@ -117,7 +118,6 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
     let passwordUpdated = false;
     let updateError: string | null = null;
     
-    // Check if only profile info (not password) has changed
     const profileInfoChanged = (user?.firstName !== data.firstName) || (user?.lastName !== data.lastName) || (user?.email !== data.email) || (user?.avatar !== data.avatar);
 
     if (profileInfoChanged) {
@@ -152,7 +152,6 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
         });
         onDone();
     } else {
-        // Nothing changed, just close the dialog
         onDone();
     }
   };
