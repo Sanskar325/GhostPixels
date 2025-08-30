@@ -59,19 +59,20 @@ export function AuthForm({ mode }: AuthFormProps) {
         firstName: (data as z.infer<typeof signupSchema>).firstName,
         lastName: (data as z.infer<typeof signupSchema>).lastName,
         email: data.email,
-        avatar: `https://ui-avatars.com/api/?name=${(data as z.infer<typeof signupSchema>).firstName}+${(data as z.infer<typeof signupSchema>).lastName}&background=random`
+        avatar: `https://ui-avatars.com/api/?name=${(data as z.infer<typeof signupSchema>).firstName}+${(data as z.infer<typeof signupSchema>).lastName}&background=random&color=fff`
     } : {
-        firstName: 'Tyler',
-        lastName: 'Durden',
+        // In a real app, you'd fetch this from your DB
+        firstName: 'Test',
+        lastName: 'User',
         email: data.email,
-        avatar: "https://github.com/shadcn.png"
+        avatar: `https://ui-avatars.com/api/?name=Test+User&background=random&color=fff`
     }
 
     login(userData);
 
     toast({
       title: isSignup ? 'Signup Successful' : 'Login Successful',
-      description: `Welcome! You have been successfully ${isSignup ? 'signed up' : 'logged in'}. Redirecting...`,
+      description: `Welcome, ${userData.firstName}! You have been successfully ${isSignup ? 'signed up' : 'logged in'}. Redirecting...`,
     });
 
     setIsLoading(false);
