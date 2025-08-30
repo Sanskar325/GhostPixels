@@ -17,7 +17,7 @@ export const EvervaultCard = ({
   const [randomString, setRandomString] = useState("");
 
   useEffect(() => {
-    let str = generateRandomString(1500);
+    let str = generateRandomString(2500);
     setRandomString(str);
   }, []);
 
@@ -26,31 +26,36 @@ export const EvervaultCard = ({
     mouseX.set(clientX - left);
     mouseY.set(clientY - top);
 
-    const str = generateRandomString(1500);
+    const str = generateRandomString(2500);
     setRandomString(str);
   }
 
   return (
     <div
       className={cn(
-        "p-0.5  bg-transparent aspect-square  flex items-center justify-center w-full h-full relative",
+        "p-0.5 bg-transparent aspect-square flex items-center justify-center w-full h-full relative",
         className
       )}
     >
       <div
         onMouseMove={onMouseMove}
-        className="group/card rounded-3xl w-full relative overflow-hidden bg-transparent flex items-center justify-center h-full"
+        className="group/card rounded-lg w-full relative overflow-hidden bg-transparent flex items-center justify-center h-full border border-white/[0.2]"
       >
         <CardPattern
           mouseX={mouseX}
           mouseY={mouseY}
           randomString={randomString}
         />
-        <div className="relative z-10 flex items-center justify-center">
-          <div className="relative h-44 w-44  rounded-full flex items-center justify-center text-white font-bold text-4xl">
-            <div className="absolute w-full h-full bg-white/[0.8] dark:bg-black/[0.8] blur-sm rounded-full" />
-            <span className="dark:text-white text-black z-20 whitespace-pre-wrap text-center text-sm">{text}</span>
-          </div>
+        <div className="relative z-10 flex items-center justify-center w-full h-full">
+            <div className="relative w-full h-full rounded-lg flex items-start justify-start p-4">
+                <Icon className="absolute h-6 w-6 -top-3 -left-3 text-foreground" />
+                <Icon className="absolute h-6 w-6 -bottom-3 -left-3 text-foreground" />
+                <Icon className="absolute h-6 w-6 -top-3 -right-3 text-foreground" />
+                <Icon className="absolute h-6 w-6 -bottom-3 -right-3 text-foreground" />
+                <div className="relative z-10 w-full h-full overflow-auto">
+                   <p className="dark:text-white text-black z-20 whitespace-pre-wrap text-left text-sm font-mono">{text}</p>
+                </div>
+            </div>
         </div>
       </div>
     </div>
@@ -58,21 +63,21 @@ export const EvervaultCard = ({
 };
 
 export function CardPattern({ mouseX, mouseY, randomString }: any) {
-  let maskImage = useMotionTemplate`radial-gradient(250px at ${mouseX}px ${mouseY}px, white, transparent)`;
+  let maskImage = useMotionTemplate`radial-gradient(350px at ${mouseX}px ${mouseY}px, white, transparent)`;
   let style = { maskImage, WebkitMaskImage: maskImage };
 
   return (
     <div className="pointer-events-none">
-      <div className="absolute inset-0 rounded-2xl  [mask-image:linear-gradient(white,transparent)] group-hover/card:opacity-50"></div>
+      <div className="absolute inset-0 rounded-lg  [mask-image:linear-gradient(white,transparent)] group-hover/card:opacity-50"></div>
       <motion.div
-        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-primary to-accent opacity-0  group-hover/card:opacity-100 backdrop-blur-xl transition duration-500"
+        className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary to-accent opacity-0  group-hover/card:opacity-100 backdrop-blur-xl transition duration-500"
         style={style}
       />
       <motion.div
-        className="absolute inset-0 rounded-2xl opacity-0 mix-blend-overlay  group-hover/card:opacity-100"
+        className="absolute inset-0 rounded-lg opacity-0 mix-blend-overlay  group-hover/card:opacity-100"
         style={style}
       >
-        <p className="absolute inset-x-0 text-xs h-full break-words whitespace-pre-wrap text-foreground font-mono font-bold transition duration-500">
+        <p className="absolute inset-0 text-xs h-full break-words whitespace-pre-wrap text-foreground font-mono font-bold transition duration-500 p-4">
           {randomString}
         </p>
       </motion.div>
