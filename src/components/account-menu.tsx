@@ -52,9 +52,9 @@ export function AccountMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-            <User className="mr-2 h-4 w-4" />
-            Account
+        <Button variant="outline" size="icon" className="rounded-full">
+            <User className="h-4 w-4" />
+            <span className="sr-only">Account</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
