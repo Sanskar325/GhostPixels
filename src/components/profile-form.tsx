@@ -67,7 +67,7 @@ const profileSchema = z.object({
 }).refine(data => {
     // If one password field is filled, all should be
     if (data.newPassword || data.currentPassword || data.confirmNewPassword) {
-        return data.newPassword && data.currentPassword && data.confirmNewPassword;
+        return !!(data.newPassword && data.currentPassword && data.confirmNewPassword);
     }
     return true;
 }, {
@@ -182,7 +182,7 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
 
   return (
     <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl shadow-primary/10 flex flex-col max-h-[90vh]">
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col h-full">
         <CardHeader className="items-center text-center">
              <Avatar className="h-24 w-24 text-4xl">
               <AvatarImage src={user.avatar} alt={`@${user.firstName}`} />
@@ -191,8 +191,8 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
             <CardTitle className="text-3xl font-bold tracking-tight">{user.firstName} {user.lastName}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
         </CardHeader>
-        <ScrollArea className="flex-1">
-          <CardContent className="px-6 py-0 space-y-6">
+        <ScrollArea className="flex-1 px-6">
+          <CardContent className="pt-0 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                       <Label htmlFor="firstName">First name</Label>
