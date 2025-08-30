@@ -11,6 +11,12 @@ export default function Home() {
       </header>
       <LampDemo />
       <main className="flex-1 -mt-[20rem] z-10 mb-16">
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 mb-8 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">What is GhostPixels?</h2>
+            <p className="max-w-3xl mx-auto text-muted-foreground md:text-lg">
+                GhostPixels leverages the ancient art of steganography, reborn for the digital age, to seamlessly embed your secret messages, files, or sensitive data within the very pixels of an image. This process makes your information completely invisible to the naked eye, appearing as nothing more than an ordinary picture. Secure your data, protect your privacy, and communicate with confidence.
+            </p>
+        </section>
         <GhostPixelsClient />
       </main>
       <footer className="bg-card/50 border-t py-6 mt-auto">
