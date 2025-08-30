@@ -322,6 +322,7 @@ export function GhostPixelsClient() {
     setChannel(settings.recommendedColorChannel as StegoChannel);
     toast({ title: "AI Settings Applied", description: `Rationale: ${settings.rationale}` });
   };
+  
   return (
     <div className="container mx-auto p-4 sm:p-6 lg:p-8">
       <Tabs value={activeTab} onValueChange={(value) => {
