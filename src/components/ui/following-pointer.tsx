@@ -52,7 +52,7 @@ export const FollowerPointerCard = ({
       className={cn("relative", className)}
     >
       <AnimatePresence>
-        {isInside && title && <FollowPointer x={x} y={y} title={title} />}
+        {isInside && <FollowPointer x={x} y={y} title={title} />}
       </AnimatePresence>
       {children}
     </div>
@@ -130,7 +130,7 @@ export const FollowPointer = ({
           "min-w-max rounded-full bg-neutral-200 px-2 py-2 text-xs whitespace-nowrap text-white"
         }
       >
-        {title}
+        {title || `GhostPixels`}
       </motion.div>
     </motion.div>
   );
