@@ -1,12 +1,14 @@
 import { GhostPixelsClient } from "@/components/ghost-pixels-client";
 import { LampDemo } from "@/components/lamp-demo";
+import { AccountMenu } from "@/components/account-menu";
 
 export default function Home() {
   return (
     <div className="relative flex flex-col min-h-screen bg-background text-foreground font-body">
       <header className="absolute top-0 left-0 right-0 z-20 py-4">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <h1 className="text-2xl font-headline font-bold text-foreground">GhostPixels</h1>
+        <div className="container mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-headline font-bold text-foreground">GhostPixels</h1>
+          <AccountMenu />
         </div>
       </header>
       <LampDemo />
