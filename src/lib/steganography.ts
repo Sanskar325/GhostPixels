@@ -37,7 +37,7 @@ export const encodeMessage = (
   bitDepth: number,
   channel: string
 ) => {
-  const binaryMessage = textToBinary(message) + DELIMITER;
+  const binaryMessage = textToBinary(message) + DELIMITAER;
   let messageIndex = 0;
 
   const imageData = ctx.getImageData(0, 0, width, height);
@@ -103,16 +103,15 @@ export const decodeMessage = (
                     binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
                 }
                  // Optimization: Check for delimiter periodically to avoid building a huge string
-                if (i % 40000 === 0) { // Check every 10000 pixels
-                    const delimiterIndexCheck = binaryMessage.indexOf(DELIMITER);
-                    if (delimiterIndexCheck !== -1) {
-                        const finalBinaryMessage = binaryMessage.substring(0, delimiterIndexCheck);
-                        resolve(binaryToText(finalBinaryMessage));
-                        return; // Exit once found
-                    }
-                }
+                 const delimiterIndexCheck = binaryMessage.indexOf(DELIMITER);
+                 if (delimiterIndexCheck !== -1) {
+                     const finalBinaryMessage = binaryMessage.substring(0, delimiterIndexCheck);
+                     resolve(binaryToText(finalBinaryMessage));
+                     return; // Exit once found
+                 }
             }
-
+            
+            // Final check in case the delimiter is at the very end
             const delimiterIndex = binaryMessage.indexOf(DELIMITER);
             if (delimiterIndex !== -1) {
                 const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
