@@ -135,7 +135,7 @@ export function GhostPixelsClient() {
   // Decode state
   const [stegoImage, setStegoImage] = useState<File | null>(null);
   const [stegoImageUrl, setStegoImageUrl] = useState<string | null>(null);
-  const [decodedMessage, setDecodedMessage] = useState("");
+  const [decodedMessage, setDecodedMessage]  = useState("");
 
   const encodedCanvasRef = useRef<HTMLCanvasElement>(null);
   const stegoCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -193,68 +193,70 @@ export function GhostPixelsClient() {
     }
 
     setIsLoading(true);
+    let encryptedMessage;
     try {
-      const encryptedMessage = await encryptMessage(message, password);
-      const img = document.createElement('img');
-      
-      img.onload = () => {
+        encryptedMessage = await encryptMessage(message, password);
+    } catch (error) {
+        console.error("Encryption error:", error);
+        toast({ variant: "destructive", title: "Encryption Failed", description: "An error occurred during encryption. Check console for details." });
+        setIsLoading(false);
+        return;
+    }
+
+    const img = document.createElement('img');
+    img.onload = () => {
         try {
-          const canvas = encodedCanvasRef.current;
-          if (!canvas) {
-              toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
-              setIsLoading(false);
-              return;
-          }
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          if(!ctx) {
-            toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
-            setIsLoading(false);
-            return;
-          }
-
-          ctx.drawImage(img, 0, 0);
-
-          if(!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage)){
-            toast({ variant: "destructive", title: "Capacity Exceeded", description: "Message is too large for the selected image and settings. Try a larger image, or increase bit depth." });
-            setIsLoading(false);
-            return;
-          }
-
-          encodeMessage(ctx, img.width, img.height, encryptedMessage, bitDepth, channel);
-          
-          canvas.toBlob((blob) => {
-            if (blob) {
-                if (encodedImageUrl) URL.revokeObjectURL(encodedImageUrl);
-                setEncodedImageUrl(URL.createObjectURL(blob));
-                toast({ title: "Success!", description: "Message successfully hidden in the image." });
-            } else {
-                 toast({ variant: "destructive", title: "Encoding Failed", description: "Could not generate image from canvas." });
+            const canvas = encodedCanvasRef.current;
+            if (!canvas) {
+                toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
+                setIsLoading(false);
+                return;
             }
-          }, 'image/png');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (!ctx) {
+                toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
+                setIsLoading(false);
+                return;
+            }
 
-        } catch(error) {
-           console.error("Encoding error:", error);
-           toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
+            ctx.drawImage(img, 0, 0);
+
+            if (!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage!)) {
+                toast({ variant: "destructive", title: "Capacity Exceeded", description: "Message is too large for the selected image and settings. Try a larger image, or increase bit depth." });
+                setIsLoading(false);
+                return;
+            }
+
+            encodeMessage(ctx, img.width, img.height, encryptedMessage!, bitDepth, channel);
+
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    if (encodedImageUrl) URL.revokeObjectURL(encodedImageUrl);
+                    setEncodedImageUrl(URL.createObjectURL(blob));
+                    toast({ title: "Success!", description: "Message successfully hidden in the image." });
+                } else {
+                    toast({ variant: "destructive", title: "Encoding Failed", description: "Could not generate image from canvas." });
+                }
+            }, 'image/png');
+
+        } catch (error) {
+            console.error("Encoding error:", error);
+            toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
         } finally {
             setIsLoading(false);
         }
-      };
-      
-      img.onerror = () => {
+    };
+
+    img.onerror = () => {
         setIsLoading(false);
         toast({ variant: "destructive", title: "Image Error", description: "Could not load the image file." });
-      };
+    };
 
-      img.src = originalImageUrl!;
-
-    } catch (error) {
-      console.error("Encryption error:", error);
-      toast({ variant: "destructive", title: "Encryption Failed", description: "An error occurred during encryption. Check console for details." });
-      setIsLoading(false);
-    }
+    img.src = originalImageUrl!;
   };
+
 
   const handleDecode = async () => {
     if (!stegoImage || !password) {
@@ -312,7 +314,7 @@ export function GhostPixelsClient() {
     a.href = encodedImageUrl;
     a.download = 'encoded-image.png';
     document.body.appendChild(a);
-    a.click();
+a.click();
     document.body.removeChild(a);
   };
 
@@ -437,7 +439,7 @@ export function GhostPixelsClient() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
                         <CardDescription>Provide the password and settings used for encoding.</CardDescription>
-                    </Header>
+                    </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="password-decode">Password</Label>
@@ -495,3 +497,5 @@ export function GhostPixelsClient() {
     </div>
   );
 }
+
+    
