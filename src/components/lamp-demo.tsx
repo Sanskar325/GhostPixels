@@ -28,7 +28,7 @@ export function LampDemo() {
           }}
           className="mt-4 text-lg text-center text-muted-foreground max-w-xl"
        >
-        GhostPixels uses the art of steganography to embed your secret messages within images, making them invisible to the naked eye. Secure your data, protect your privacy, and communicate with confidence, knowing your information is cleverly concealed from unauthorized access.
+        GhostPixels leverages the ancient art of steganography, reborn for the digital age, to seamlessly embed your secret messages, files, or sensitive data within the very pixels of an image. This process makes your information completely invisible to the naked eye, appearing as nothing more than an ordinary picture. Secure your personal data, protect your privacy with state-of-the-art encryption, and communicate with absolute confidence, knowing your information is cleverly and securely concealed from any unauthorized access. Whether for confidential business communications or personal secrets, GhostPixels is your digital vault in plain sight.
        </motion.p>
     </LampContainer>
   );
