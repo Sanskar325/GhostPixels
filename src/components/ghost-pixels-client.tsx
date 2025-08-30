@@ -193,68 +193,61 @@ export function GhostPixelsClient() {
     }
 
     setIsLoading(true);
-    let encryptedMessage;
+    
     try {
-        encryptedMessage = await encryptMessage(message, password);
+        const encryptedMessage = await encryptMessage(message, password);
+
+        const img = document.createElement('img');
+        img.onload = () => {
+            try {
+                const canvas = encodedCanvasRef.current;
+                if (!canvas) throw new Error("Canvas element not found.");
+
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                if (!ctx) throw new Error("Could not get canvas context.");
+                
+                ctx.drawImage(img, 0, 0);
+
+                if (!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage)) {
+                    throw new Error("Message is too large for the selected image and settings. Try a larger image, or increase bit depth.");
+                }
+
+                encodeMessage(ctx, img.width, img.height, encryptedMessage, bitDepth, channel);
+
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        if (encodedImageUrl) URL.revokeObjectURL(encodedImageUrl);
+                        setEncodedImageUrl(URL.createObjectURL(blob));
+                        toast({ title: "Success!", description: "Message successfully hidden in the image." });
+                    } else {
+                       throw new Error("Could not generate image from canvas.");
+                    }
+                }, 'image/png');
+
+            } catch (error) {
+                console.error("Encoding error:", error);
+                const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during encoding.";
+                toast({ variant: "destructive", title: "Encoding Failed", description: errorMessage });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        img.onerror = () => {
+            setIsLoading(false);
+            toast({ variant: "destructive", title: "Image Error", description: "Could not load the image file." });
+        };
+
+        img.src = originalImageUrl!;
+
     } catch (error) {
         console.error("Encryption error:", error);
-        toast({ variant: "destructive", title: "Encryption Failed", description: "An error occurred during encryption. Check console for details." });
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred during encryption.";
+        toast({ variant: "destructive", title: "Encryption Failed", description: errorMessage });
         setIsLoading(false);
-        return;
     }
-
-    const img = document.createElement('img');
-    img.onload = () => {
-        try {
-            const canvas = encodedCanvasRef.current;
-            if (!canvas) {
-                toast({ variant: "destructive", title: "Error", description: "Canvas element not found." });
-                setIsLoading(false);
-                return;
-            }
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true });
-            if (!ctx) {
-                toast({ variant: "destructive", title: "Error", description: "Could not get canvas context." });
-                setIsLoading(false);
-                return;
-            }
-
-            ctx.drawImage(img, 0, 0);
-
-            if (!checkCapacity(img.width, img.height, bitDepth, channel, encryptedMessage!)) {
-                toast({ variant: "destructive", title: "Capacity Exceeded", description: "Message is too large for the selected image and settings. Try a larger image, or increase bit depth." });
-                setIsLoading(false);
-                return;
-            }
-
-            encodeMessage(ctx, img.width, img.height, encryptedMessage!, bitDepth, channel);
-
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    if (encodedImageUrl) URL.revokeObjectURL(encodedImageUrl);
-                    setEncodedImageUrl(URL.createObjectURL(blob));
-                    toast({ title: "Success!", description: "Message successfully hidden in the image." });
-                } else {
-                    toast({ variant: "destructive", title: "Encoding Failed", description: "Could not generate image from canvas." });
-                }
-            }, 'image/png');
-
-        } catch (error) {
-            console.error("Encoding error:", error);
-            toast({ variant: "destructive", title: "Encoding Failed", description: "An error occurred during encoding. Check console for details." });
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    img.onerror = () => {
-        setIsLoading(false);
-        toast({ variant: "destructive", title: "Image Error", description: "Could not load the image file." });
-    };
-
-    img.src = originalImageUrl!;
   };
 
 
@@ -314,7 +307,7 @@ export function GhostPixelsClient() {
     a.href = encodedImageUrl;
     a.download = 'encoded-image.png';
     document.body.appendChild(a);
-a.click();
+    a.click();
     document.body.removeChild(a);
   };
 
@@ -497,5 +490,3 @@ a.click();
     </div>
   );
 }
-
-    
