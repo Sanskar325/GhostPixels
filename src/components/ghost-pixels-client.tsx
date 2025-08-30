@@ -37,6 +37,7 @@ import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 import { Meteors } from "./ui/meteors";
 import { CardContainer, CardBody, CardItem } from "./ui/3d-card";
+import { FileUpload } from "./ui/file-upload";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -148,8 +149,8 @@ export function GhostPixelsClient() {
     };
   }, [originalImageUrl, encodedImageUrl, stegoImageUrl]);
 
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>, type: "original" | "stego") => {
-    const file = e.target.files?.[0];
+  const handleImageChange = (files: File[], type: "original" | "stego") => {
+    const file = files[0];
     if (!file) return;
 
     if (type === "original") {
@@ -347,7 +348,7 @@ export function GhostPixelsClient() {
                   <CardDescription>Select a PNG or JPEG to hide your message in.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Input id="image-upload" type="file" accept="image/png, image/jpeg" onChange={(e) => handleImageChange(e, 'original')} className="file:text-primary file:font-bold" />
+                  <FileUpload onChange={(files) => handleImageChange(files, 'original')} />
                 </CardContent>
               </Card>
 
@@ -430,7 +431,7 @@ export function GhostPixelsClient() {
                       <CardDescription>Select the PNG image containing the hidden message.</CardDescription>
                   </CardHeader>
                   <CardContent>
-                      <Input id="stego-image-upload" type="file" accept="image/png" onChange={(e) => handleImageChange(e, 'stego')} className="file:text-primary file:font-bold" />
+                      <FileUpload onChange={(files) => handleImageChange(files, 'stego')} />
                       <canvas ref={stegoCanvasRef} className="hidden" />
                   </CardContent>
                 </Card>
@@ -475,7 +476,7 @@ export function GhostPixelsClient() {
                   </CardContent>
                 </Card>
                  {decodedMessage && (
-                    <Card className="shadow-lg">
+                    <Card className="shadow-lg min-h-[260px]">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
                         <CardContent>
                             <Textarea value={decodedMessage} readOnly className="font-code bg-muted/50 text-base min-h-[200px]" />
