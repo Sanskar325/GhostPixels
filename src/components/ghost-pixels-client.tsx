@@ -439,7 +439,7 @@ export function GhostPixelsClient() {
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><KeyRound/> 2. Enter Password & Settings</CardTitle>
                         <CardDescription>Provide the password and settings used for encoding.</CardDescription>
-                    </CardHeader>
+                    </Header>
                     <CardContent className="space-y-4">
                         <div>
                             <Label htmlFor="password-decode">Password</Label>
@@ -476,7 +476,7 @@ export function GhostPixelsClient() {
                   </CardContent>
                 </Card>
                  {decodedMessage && (
-                    <Card className="shadow-lg min-h-[260px]">
+                    <Card className="shadow-lg">
                         <CardHeader><CardTitle>Revealed Message</CardTitle></CardHeader>
                         <CardContent>
                             <Textarea value={decodedMessage} readOnly className="font-code bg-muted/50 text-base min-h-[200px]" />
