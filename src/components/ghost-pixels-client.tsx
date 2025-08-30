@@ -316,7 +316,6 @@ export function GhostPixelsClient() {
     document.body.removeChild(a);
   };
 
-
   const applyAiSettings = (settings: RecommendedSettings) => {
     setBitDepth(settings.recommendedBitDepth);
     setChannel(settings.recommendedColorChannel as StegoChannel);
