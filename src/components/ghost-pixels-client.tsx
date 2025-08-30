@@ -496,5 +496,3 @@ export function GhostPixelsClient() {
     </div>
   );
 }
-
-    
