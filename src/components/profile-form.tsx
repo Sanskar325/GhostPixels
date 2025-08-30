@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from './ui/skeleton';
 import { Separator } from './ui/separator';
+import { ScrollArea } from './ui/scroll-area';
 
 interface PasswordInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
     id: string;
@@ -180,7 +181,7 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
 
 
   return (
-    <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl shadow-primary/10">
+    <Card className="w-full max-w-2xl bg-card/80 backdrop-blur-sm border-border/50 shadow-2xl shadow-primary/10 flex flex-col max-h-[90vh]">
     <form onSubmit={handleSubmit(onSubmit)}>
         <CardHeader className="items-center text-center">
              <Avatar className="h-24 w-24 text-4xl">
@@ -190,55 +191,57 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
             <CardTitle className="text-3xl font-bold tracking-tight">{user.firstName} {user.lastName}</CardTitle>
             <CardDescription>{user.email}</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor="firstName">First name</Label>
-                    <Input id="firstName" {...register('firstName')} className="bg-input/50"/>
-                    {errors.firstName && <p className="text-sm text-destructive mt-1">{errors.firstName.message}</p>}
-                </div>
-                    <div className="space-y-2">
-                    <Label htmlFor="lastName">Last name</Label>
-                    <Input id="lastName" {...register('lastName')} className="bg-input/50"/>
-                    {errors.lastName && <p className="text-sm text-destructive mt-1">{errors.lastName.message}</p>}
-                </div>
-            </div>
-            <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input id="email" type="email" {...register('email')} className="bg-input/50"/>
-                {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="avatar">Avatar URL</Label>
-                <Input id="avatar" type="text" {...register('avatar')} placeholder="https://example.com/avatar.png" className="bg-input/50"/>
-                {errors.avatar && <p className="text-sm text-destructive mt-1">{errors.avatar.message}</p>}
-            </div>
-            <Separator className="my-6" />
-            <div>
-                <h3 className="text-lg font-medium flex items-center gap-2"><KeyRound/> Change Password</h3>
-                <p className="text-sm text-muted-foreground">Leave these fields blank to keep your current password.</p>
-            </div>
-            <div className="space-y-4">
-                 <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <PasswordInput id="currentPassword" {...register('currentPassword')} placeholder="••••••••" />
-                    {errors.currentPassword && <p className="text-sm text-destructive mt-1">{errors.currentPassword.message}</p>}
-                </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                     <div className="space-y-2">
-                        <Label htmlFor="newPassword">New Password</Label>
-                        <PasswordInput id="newPassword" {...register('newPassword')} placeholder="••••••••" />
-                        {errors.newPassword && <p className="text-sm text-destructive mt-1">{errors.newPassword.message}</p>}
-                    </div>
-                     <div className="space-y-2">
-                        <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
-                        <PasswordInput id="confirmNewPassword" {...register('confirmNewPassword')} placeholder="••••••••" />
-                        {errors.confirmNewPassword && <p className="text-sm text-destructive mt-1">{errors.confirmNewPassword.message}</p>}
-                    </div>
-                </div>
-            </div>
-        </CardContent>
-        <CardFooter>
+        <ScrollArea className="flex-1">
+          <CardContent className="px-6 py-0 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                      <Label htmlFor="firstName">First name</Label>
+                      <Input id="firstName" {...register('firstName')} className="bg-input/50"/>
+                      {errors.firstName && <p className="text-sm text-destructive mt-1">{errors.firstName.message}</p>}
+                  </div>
+                      <div className="space-y-2">
+                      <Label htmlFor="lastName">Last name</Label>
+                      <Input id="lastName" {...register('lastName')} className="bg-input/50"/>
+                      {errors.lastName && <p className="text-sm text-destructive mt-1">{errors.lastName.message}</p>}
+                  </div>
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input id="email" type="email" {...register('email')} className="bg-input/50"/>
+                  {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
+              </div>
+              <div className="space-y-2">
+                  <Label htmlFor="avatar">Avatar URL</Label>
+                  <Input id="avatar" type="text" {...register('avatar')} placeholder="https://example.com/avatar.png" className="bg-input/50"/>
+                  {errors.avatar && <p className="text-sm text-destructive mt-1">{errors.avatar.message}</p>}
+              </div>
+              <Separator className="my-6" />
+              <div>
+                  <h3 className="text-lg font-medium flex items-center gap-2"><KeyRound/> Change Password</h3>
+                  <p className="text-sm text-muted-foreground">Leave these fields blank to keep your current password.</p>
+              </div>
+              <div className="space-y-4">
+                  <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <PasswordInput id="currentPassword" {...register('currentPassword')} placeholder="••••••••" />
+                      {errors.currentPassword && <p className="text-sm text-destructive mt-1">{errors.currentPassword.message}</p>}
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                          <Label htmlFor="newPassword">New Password</Label>
+                          <PasswordInput id="newPassword" {...register('newPassword')} placeholder="••••••••" />
+                          {errors.newPassword && <p className="text-sm text-destructive mt-1">{errors.newPassword.message}</p>}
+                      </div>
+                      <div className="space-y-2">
+                          <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                          <PasswordInput id="confirmNewPassword" {...register('confirmNewPassword')} placeholder="••••••••" />
+                          {errors.confirmNewPassword && <p className="text-sm text-destructive mt-1">{errors.confirmNewPassword.message}</p>}
+                      </div>
+                  </div>
+              </div>
+          </CardContent>
+        </ScrollArea>
+        <CardFooter className="pt-6">
             <Button type="submit" disabled={isUpdating || !formState.isDirty} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
                 {isUpdating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" /> }
                 Save Changes
