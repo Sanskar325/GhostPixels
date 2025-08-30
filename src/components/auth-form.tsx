@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -5,19 +6,28 @@ import Link from 'next/link';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2, LogIn, UserPlus } from 'lucide-react';
+import { Loader2, LogIn, UserPlus, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
-const formSchema = z.object({
+const signupSchema = z.object({
+  firstName: z.string().min(1, { message: 'First name is required.' }),
+  lastName: z.string().min(1, { message: 'Last name is required.' }),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
+  password: z.string().min(8, { message: 'Password must be at least 8 characters long.' }),
+  confirmPassword: z.string().min(8, { message: 'Password must be at least 8 characters long.' }),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+const loginSchema = z.object({
   email: z.string().email({ message: 'Please enter a valid email address.' }),
   password: z.string().min(8, { message: 'Password must be at least 8 characters long.' }),
 });
-
-type FormValues = z.infer<typeof formSchema>;
 
 interface AuthFormProps {
   mode: 'login' | 'signup';
@@ -26,53 +36,65 @@ interface AuthFormProps {
 export function AuthForm({ mode }: AuthFormProps) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const isSignup = mode === 'signup';
+
+  const formSchema = isSignup ? signupSchema : loginSchema;
+  type FormValues = z.infer<typeof formSchema>;
 
   const { register, handleSubmit, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
-    // Here you would typically handle the login or signup logic,
-    // e.g., by calling a Firebase function or your backend API.
     console.log('Auth data:', data);
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
 
     toast({
-      title: mode === 'login' ? 'Login Successful' : 'Signup Successful',
-      description: `Welcome! You have been successfully ${mode === 'login' ? 'logged in' : 'signed up'}.`,
+      title: isSignup ? 'Signup Successful' : 'Login Successful',
+      description: `Welcome! You have been successfully ${isSignup ? 'signed up' : 'logged in'}.`,
     });
 
     setIsLoading(false);
-    // router.push('/'); // Redirect to home or dashboard after successful auth
+    // In a real app, you would redirect here:
+    // router.push('/');
   };
 
-  const title = mode === 'login' ? 'Welcome Back' : 'Create an Account';
-  const description = mode === 'login' ? 'Enter your credentials to access your account.' : 'Fill in the details below to create a new account.';
-  const buttonText = mode === 'login' ? 'Log In' : 'Sign Up';
-  const buttonIcon = mode === 'login' ? <LogIn className="mr-2 h-4 w-4" /> : <UserPlus className="mr-2 h-4 w-4" />;
-  const footerText = mode === 'login' ? "Don't have an account?" : 'Already have an account?';
-  const footerLink = mode === 'login' ? '/signup' : '/login';
-  const footerLinkText = mode === 'login' ? 'Sign up' : 'Log in';
+  const title = isSignup ? 'Welcome to GhostPixels' : 'Welcome Back';
+  const description = isSignup ? 'Create your account to start hiding secrets in plain sight.' : 'Enter your credentials to access your account.';
+  const buttonText = isSignup ? 'Sign up' : 'Log In';
+  const footerText = isSignup ? 'Already have an account?' : "Don't have an account?";
+  const footerLink = isSignup ? '/login' : '/signup';
+  const footerLinkText = isSignup ? 'Log in' : 'Sign up';
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
-       <Card className="w-full max-w-md bg-card/70 shadow-2xl shadow-primary/10">
-        <CardHeader className="text-center">
+       <Card className="w-full max-w-lg bg-card/70 shadow-2xl shadow-primary/10">
+        <CardHeader>
             <CardTitle className="text-3xl font-bold tracking-tight">{title}</CardTitle>
             <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                 {isSignup && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="firstName">First name</Label>
+                            <Input id="firstName" placeholder="Tyler" {...register('firstName')} className="bg-input/50"/>
+                            {errors.firstName && <p className="text-sm text-destructive mt-1">{(errors as any).firstName.message}</p>}
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="lastName">Last name</Label>
+                            <Input id="lastName" placeholder="Durden" {...register('lastName')} className="bg-input/50"/>
+                            {errors.lastName && <p className="text-sm text-destructive mt-1">{(errors as any).lastName.message}</p>}
+                        </div>
+                    </div>
+                )}
                 <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" placeholder="name@example.com" {...register('email')} className="bg-input/50"/>
+                    <Label htmlFor="email">Email Address</Label>
+                    <Input id="email" type="email" placeholder="projectmayhem@fc.com" {...register('email')} className="bg-input/50"/>
                     {errors.email && <p className="text-sm text-destructive mt-1">{errors.email.message}</p>}
                 </div>
                 <div className="space-y-2">
@@ -80,13 +102,21 @@ export function AuthForm({ mode }: AuthFormProps) {
                     <Input id="password" type="password" placeholder="••••••••" {...register('password')} className="bg-input/50"/>
                     {errors.password && <p className="text-sm text-destructive mt-1">{errors.password.message}</p>}
                 </div>
+                 {isSignup && (
+                    <div className="space-y-2">
+                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <Input id="confirmPassword" type="password" placeholder="••••••••" {...register('confirmPassword')} className="bg-input/50"/>
+                        {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{(errors as any).confirmPassword.message}</p>}
+                    </div>
+                )}
                 <Button type="submit" disabled={isLoading} className="w-full text-lg py-6 shadow-lg shadow-primary/20">
-                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : buttonIcon}
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : (isSignup ? null : <LogIn className="mr-2 h-4 w-4" />) }
                     {buttonText}
+                    {isSignup && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
             </form>
         </CardContent>
-        <CardFooter className="text-center text-sm text-muted-foreground">
+        <CardFooter className="justify-center text-center text-sm text-muted-foreground">
             <p>{footerText} <Link href={footerLink} className="font-semibold text-primary hover:underline">{footerLinkText}</Link></p>
         </CardFooter>
        </Card>
