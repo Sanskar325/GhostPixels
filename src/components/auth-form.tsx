@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
 
 const signupSchema = z.object({
   firstName: z.string().min(1, { message: 'First name is required.' }),
@@ -37,6 +38,7 @@ interface AuthFormProps {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const isSignup = mode === 'signup';
 
@@ -49,10 +51,23 @@ export function AuthForm({ mode }: AuthFormProps) {
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setIsLoading(true);
-    console.log('Auth data:', data);
-
+    
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    const userData = isSignup ? {
+        firstName: (data as z.infer<typeof signupSchema>).firstName,
+        lastName: (data as z.infer<typeof signupSchema>).lastName,
+        email: data.email,
+        avatar: `https://ui-avatars.com/api/?name=${(data as z.infer<typeof signupSchema>).firstName}+${(data as z.infer<typeof signupSchema>).lastName}&background=random`
+    } : {
+        firstName: 'Tyler',
+        lastName: 'Durden',
+        email: data.email,
+        avatar: "https://github.com/shadcn.png"
+    }
+
+    login(userData);
 
     toast({
       title: isSignup ? 'Signup Successful' : 'Login Successful',

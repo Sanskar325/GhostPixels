@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import {
   DropdownMenu,
@@ -13,18 +13,12 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogIn, LogOut, User, UserPlus, Settings } from 'lucide-react';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AccountMenu() {
-  // In a real app, you'd get this from a context, store, or hook
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const [user, setUser] = useState({ 
-    firstName: "Tyler", 
-    lastName: "Durden", 
-    email: "projectmayhem@fc.com", 
-    avatar: "https://github.com/shadcn.png" 
-  });
+  const { user, logout } = useAuth();
 
-  if (isLoggedIn) {
+  if (user) {
     const userInitial = user.firstName ? user.firstName.charAt(0).toUpperCase() : '';
     return (
       <DropdownMenu>
@@ -46,11 +40,13 @@ export function AccountMenu() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setIsLoggedIn(false)}>
+          <Link href="/profile" passHref>
+            <DropdownMenuItem>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>Profile</span>
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuItem onClick={logout}>
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -69,7 +65,7 @@ export function AccountMenu() {
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <Link href="/login" passHref>
-          <DropdownMenuItem onClick={() => setIsLoggedIn(true)}>
+          <DropdownMenuItem>
             <LogIn className="mr-2 h-4 w-4" />
             <span>Log In</span>
           </DropdownMenuItem>
