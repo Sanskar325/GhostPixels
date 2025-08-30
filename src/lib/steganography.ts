@@ -37,7 +37,7 @@ export const encodeMessage = (
   bitDepth: number,
   channel: string
 ) => {
-  const binaryMessage = textToBinary(message) + DELIMITAER;
+  const binaryMessage = textToBinary(message) + DELIMITER;
   let messageIndex = 0;
 
   const imageData = ctx.getImageData(0, 0, width, height);
