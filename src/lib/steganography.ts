@@ -1,3 +1,4 @@
+
 const DELIMITER = "001100010011010100111001001100100011010100110111"; // "159257" in binary, unlikely sequence
 
 function textToBinary(text: string): string {
@@ -95,43 +96,29 @@ export const decodeMessage = (
             }[channel as 'R' | 'G' | 'B' | 'RGB'] || [0, 1, 2];
             
             let binaryMessage = '';
-            let i = 0;
-            const pixelsPerChunk = 5000; // Adjust chunk size based on performance
-            const totalPixels = width * height;
-
-            const processChunk = (deadline?: IdleDeadline) => {
-                while ((deadline && deadline.timeRemaining() > 0 || !deadline) && i < data.length) {
-                    for (let p = 0; p < pixelsPerChunk && i < data.length; p++) {
-                        for (const channelIndex of channelsToUse) {
-                            const lsb = data[i + channelIndex] & lsbMask;
-                            binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
-                        }
-                        i += 4;
-                    }
-
-                    const delimiterIndex = binaryMessage.indexOf(DELIMITER);
-                    if (delimiterIndex !== -1) {
-                        const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
-                        resolve(binaryToText(finalBinaryMessage));
-                        return;
-                    }
-                }
-
-                if (i < data.length) {
-                   if (typeof requestIdleCallback === 'function') {
-                     requestIdleCallback(processChunk);
-                   } else {
-                     setTimeout(processChunk, 0);
-                   }
-                } else {
-                    reject(new Error("No message found or extraction failed."));
-                }
-            };
             
-            if (typeof requestIdleCallback === 'function') {
-                requestIdleCallback(processChunk);
+            for (let i = 0; i < data.length; i += 4) {
+                for (const channelIndex of channelsToUse) {
+                    const lsb = data[i + channelIndex] & lsbMask;
+                    binaryMessage += lsb.toString(2).padStart(bitDepth, '0');
+                }
+                 // Optimization: Check for delimiter periodically to avoid building a huge string
+                if (i % 40000 === 0) { // Check every 10000 pixels
+                    const delimiterIndexCheck = binaryMessage.indexOf(DELIMITER);
+                    if (delimiterIndexCheck !== -1) {
+                        const finalBinaryMessage = binaryMessage.substring(0, delimiterIndexCheck);
+                        resolve(binaryToText(finalBinaryMessage));
+                        return; // Exit once found
+                    }
+                }
+            }
+
+            const delimiterIndex = binaryMessage.indexOf(DELIMITER);
+            if (delimiterIndex !== -1) {
+                const finalBinaryMessage = binaryMessage.substring(0, delimiterIndex);
+                resolve(binaryToText(finalBinaryMessage));
             } else {
-                setTimeout(processChunk, 0);
+                reject(new Error("No message found or extraction failed."));
             }
         } catch (e) {
             reject(e);
