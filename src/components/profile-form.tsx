@@ -67,7 +67,7 @@ const profileSchema = z.object({
     path: ["newPassword"],
 }).refine(data => {
     // If one of the password fields is filled, all three must be filled.
-    if (data.newPassword || data.currentPassword || data.confirmNewPassword) {
+    if (data.newPassword || data.confirmNewPassword) { // currentPassword is required only if new is present
         return !!(data.currentPassword && data.newPassword && data.confirmNewPassword);
     }
     return true;
@@ -96,19 +96,27 @@ export function ProfileForm({ onDone }: ProfileFormProps) {
   const { user, updateUser, updatePassword, isLoading: isAuthLoading } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const { register, handleSubmit, formState: { errors, isDirty }, reset } = useForm<FormValues>({
+  const { register, handleSubmit, formState: { errors, isDirty } } = useForm<FormValues>({
     resolver: zodResolver(profileSchema),
-    mode: "onChange"
-  });
-
-  useEffect(() => {
-    if (user) {
-      reset({ ...user, currentPassword: '', newPassword: '', confirmNewPassword: '' });
+    mode: "onChange",
+    defaultValues: {
+      firstName: user?.firstName ?? '',
+      lastName: user?.lastName ?? '',
+      email: user?.email ?? '',
+      avatar: user?.avatar ?? '',
+      currentPassword: '',
+      newPassword: '',
+      confirmNewPassword: ''
     }
-  }, [user, reset]);
+  });
 
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
+    if (!isDirty) {
+        onDone();
+        return;
+    };
+
     setIsUpdating(true);
     await new Promise(resolve => setTimeout(resolve, 1000));
     
