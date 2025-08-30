@@ -1,7 +1,7 @@
 
 "use client";
 
-import { Dialog, DialogContent, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogOverlay, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ProfileForm } from "./profile-form";
 
 interface ProfileDialogProps {
@@ -14,6 +14,8 @@ export function ProfileDialog({ isOpen, onOpenChange }: ProfileDialogProps) {
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
              <DialogOverlay className="backdrop-blur-sm" />
              <DialogContent className="bg-transparent p-0 border-0 shadow-none max-w-2xl">
+                 <DialogTitle className="sr-only">Profile Settings</DialogTitle>
+                 <DialogDescription className="sr-only">View and edit your profile information.</DialogDescription>
                  <ProfileForm />
              </DialogContent>
         </Dialog>
