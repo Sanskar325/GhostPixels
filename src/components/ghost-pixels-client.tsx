@@ -37,7 +37,7 @@ import { encryptMessage, decryptMessage } from "@/lib/crypto";
 import { encodeMessage, decodeMessage, checkCapacity } from "@/lib/steganography";
 import { Meteors } from "./ui/meteors";
 import { CardContainer, CardBody, CardItem } from "./ui/3d-card";
-import { EvervaultCard, Icon } from "./ui/evervault-card";
+import { EvervaultCard } from "./ui/evervault-card";
 
 type StegoChannel = "RGB" | "R" | "G" | "B";
 
@@ -452,6 +452,18 @@ export function GhostPixelsClient() {
                       <Trash2 className="mr-2 h-4 w-4" /> Reset
                   </Button>
                 </div>
+                {decodedMessage && (
+                  <Card className="shadow-lg bg-card/70">
+                    <CardHeader>
+                      <CardTitle>Revealed Message</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="w-full max-h-[250px] overflow-auto">
+                          <EvervaultCard text={decodedMessage} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
 
               <div className="space-y-6">
@@ -469,18 +481,6 @@ export function GhostPixelsClient() {
                     </CardContainer>
                   </CardContent>
                 </Card>
-                 {decodedMessage && (
-                    <Card className="shadow-lg bg-card/70">
-                      <CardHeader>
-                        <CardTitle>Revealed Message</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="w-full max-h-[250px] overflow-auto">
-                            <EvervaultCard text={decodedMessage} />
-                        </div>
-                      </CardContent>
-                    </Card>
-                 )}
               </div>
            </div>
         </TabsContent>
