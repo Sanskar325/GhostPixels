@@ -3,6 +3,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,6 +35,7 @@ interface AuthFormProps {
 }
 
 export function AuthForm({ mode }: AuthFormProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const isSignup = mode === 'signup';
@@ -54,12 +56,11 @@ export function AuthForm({ mode }: AuthFormProps) {
 
     toast({
       title: isSignup ? 'Signup Successful' : 'Login Successful',
-      description: `Welcome! You have been successfully ${isSignup ? 'signed up' : 'logged in'}.`,
+      description: `Welcome! You have been successfully ${isSignup ? 'signed up' : 'logged in'}. Redirecting...`,
     });
 
     setIsLoading(false);
-    // In a real app, you would redirect here:
-    // router.push('/');
+    router.push('/');
   };
 
   const title = isSignup ? 'Welcome to GhostPixels' : 'Welcome Back';
